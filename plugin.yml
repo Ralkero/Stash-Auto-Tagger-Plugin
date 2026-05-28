@@ -1,0 +1,46 @@
+name: Scene Auto-Tagger
+description: Safety-first embedded JS auto-tagger for selected scenes. The task button applies to a bounded newest-incomplete-scene batch and preserves existing metadata.
+version: 0.1.16
+interface: js
+exec:
+  - scene-auto-tagger.js
+errLog: info
+
+tasks:
+  - name: Bulk auto-tag scenes
+    description: Apply auto-tagging to selected scenes, or to a bounded batch of incomplete scenes when no scene_ids are supplied.
+    defaultArgs:
+      mode: bulk
+      dryRun: false
+      addNeedsReviewTag: false
+      removeNeedsReviewOnApply: true
+      allowDiscoveredWrites: true
+      sceneDiscoveryLimit: 100
+      sceneDiscoveryPageSize: 100
+      sceneDiscoveryScanPages: 50
+      sceneDiscoverySort: id
+      sceneDiscoveryDirection: DESC
+      sceneDiscoveryOnlyUnorganized: true
+      sceneDiscoveryOnlyIncomplete: true
+      sceneDiscoveryIncludeMissingStudioOnly: false
+      sceneDiscoverySkipNeedsReview: true
+      sceneDiscoveryOnlyActionable: true
+      sceneDiscoveryRepairNeedsReview: true
+
+# Intentionally minimal for Stash v0.30.1 compatibility.
+# The detailed settings block was removed because some v0.30.x builds reject
+# plugin.yml settings shapes during YAML unmarshal and hide the plugin on reload.
+#
+# Safe defaults live in scene-auto-tagger.js:
+# - dryRun: true
+# - allowOverwriteExistingMetadata: false
+# - no hook registered
+#
+# The visible "Bulk auto-tag scenes" task intentionally overrides dryRun to false
+# through defaultArgs so the button performs a bounded real apply pass. Discovery
+# only selects newest incomplete scenes with apply-level work to do by default,
+# repairs Needs Review scenes if aliases make them actionable, removes only the
+# Needs Review tag after a successful apply-confidence repair, does not add new
+# Needs Review tags from the button, and never removes any other metadata.
+#
+# Scene.Create.Post is intentionally not registered in this safety-first release.
