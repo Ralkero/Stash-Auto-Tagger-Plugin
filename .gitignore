@@ -1,0 +1,26 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Logs and local outputs
+*.log
+*.tmp
+*.bak
+*.backup
+*.sqlite
+*.sqlite3
+*.db
+task-output/
+logs/
+backups/
+
+# Dependency folders should not be needed for this embedded JS plugin
+node_modules/
+
+# Local Stash/plugin backup copies
+scene-auto-tagger.backup-*/
+scene-auto-tagger.pre-*/
+plugin-backups/
