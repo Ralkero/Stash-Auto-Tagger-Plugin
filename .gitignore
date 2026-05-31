@@ -1,0 +1,21 @@
+﻿# Stash Plugin - Recommended .gitignore
+
+# Production / sensitive files
+aliases.json
+*.log
+*.csv
+
+# Development / internal docs
+PLUGIN_AUDIT_REPORT.md
+HANDOVER.md
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Node (if ever used for testing)
+node_modules/

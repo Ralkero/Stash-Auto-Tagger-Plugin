@@ -1,0 +1,16 @@
+{
+  "studios": {
+    "overwatch": "Overwatch",
+    "ow": "Overwatch",
+    "rule34": "Rule34"
+  },
+  "groups": {
+    "bewyx": "Bewyx",
+    "bewyx_": "Bewyx",
+    "artistname": "Artist Name"
+  },
+  "characters": {
+    "mei": "Mei",
+    "tracer": "Tracer"
+  }
+}

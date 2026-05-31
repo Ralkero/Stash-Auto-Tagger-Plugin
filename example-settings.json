@@ -1,0 +1,10 @@
+{
+  "dryRun": true,
+  "createMissingTags": true,
+  "createMissingGroups": true,
+  "createMissingStudios": true,
+  "confidenceThreshold": 0.9,
+  "characterParentTag": "Characters",
+  "addNeedsReviewTag": true,
+  "allowOverwriteExistingMetadata": false
+}
