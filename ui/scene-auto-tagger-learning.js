@@ -4,6 +4,7 @@
   var PLUGIN_NAME = "Scene Auto-Tagger";
   var STABLE_PLUGIN_ID = "scene-auto-tagger";
   var PANEL_CLASS = "sat-teach-panel";
+  var BROWSE_BUTTON_CLASS = "sat-browse-teach-button";
   var baseURL = (document.querySelector("base") && document.querySelector("base").getAttribute("href")) || "/";
   var pluginIdPromise = null;
   var setupTimer = null;
@@ -85,6 +86,7 @@
   function modalShell(title) {
     closeModal();
     var backdrop = el("div", "sat-modal-backdrop");
+    backdrop.setAttribute("data-origin-path", window.location.pathname);
     var dialog = el("section", "sat-modal");
     dialog.setAttribute("role", "dialog");
     dialog.setAttribute("aria-modal", "true");
@@ -337,15 +339,19 @@
     shell.body.appendChild(footer);
   }
 
-  function openTeachModal() {
-    var sceneId = sceneIdFromLocation();
+  function openTeachModalForScene(sceneId) {
     if (!sceneId) return;
+    var originPath = window.location.pathname;
     var shell = modalShell("Teach Auto-Tagger");
     setBusy(shell, "Comparing the corrected scene with current tagger behavior...");
     runOperation("learn_preview", { sceneId: sceneId }).then(function (result) {
-      if (sceneIdFromLocation() !== String(sceneId)) return closeModal();
+      if (window.location.pathname !== originPath) return closeModal();
       renderLearningPreview(shell, result);
     }).catch(function (error) { showError(shell, error); });
+  }
+
+  function openTeachModal() {
+    openTeachModalForScene(sceneIdFromLocation());
   }
 
   function openRuleManager() {
@@ -392,12 +398,101 @@
     Array.prototype.forEach.call(document.querySelectorAll("." + PANEL_CLASS), function (panel) { panel.remove(); });
   }
 
+  function selectedBrowseSceneIds() {
+    var ids = [];
+    Array.prototype.forEach.call(document.querySelectorAll(".scene-card input.card-check:checked"), function (check) {
+      var card = check.closest && check.closest(".scene-card");
+      var link = card && card.querySelector('a[href*="/scenes/"]');
+      var match = link && String(link.getAttribute("href") || "").match(/\/scenes\/(\d+)/);
+      if (match && ids.indexOf(match[1]) === -1) ids.push(match[1]);
+    });
+    return ids;
+  }
+
+  function browseEditDialog() {
+    if (!/^\/scenes\/?$/.test(window.location.pathname)) return null;
+    var dialogs = document.querySelectorAll('.ModalComponent.modal.show[role="dialog"]');
+    for (var i = 0; i < dialogs.length; i++) {
+      var header = dialogs[i].querySelector(".modal-header");
+      if (header && /^Edit\s+\d+\s+Scenes?$/.test(String(header.textContent || "").trim())) return dialogs[i];
+    }
+    return null;
+  }
+
+  function buttonWithText(root, text) {
+    var buttons = root ? root.querySelectorAll("button") : [];
+    for (var i = 0; i < buttons.length; i++) {
+      if (String(buttons[i].textContent || "").trim() === text) return buttons[i];
+    }
+    return null;
+  }
+
+  function waitForRemoval(node, timeoutMs) {
+    return new Promise(function (resolve, reject) {
+      var started = Date.now();
+      function check() {
+        if (!node || !node.isConnected) return resolve();
+        if (Date.now() - started >= timeoutMs) return reject(new Error("Stash did not finish applying the scene edit."));
+        window.setTimeout(check, 100);
+      }
+      check();
+    });
+  }
+
+  function applyAndTeachFromBrowse(event) {
+    var teachButton = event.currentTarget;
+    var dialog = teachButton.closest && teachButton.closest('[role="dialog"]');
+    var sceneId = teachButton.getAttribute("data-scene-id");
+    var applyButton = buttonWithText(dialog, "Apply");
+    if (!dialog || !sceneId || !applyButton) return;
+
+    teachButton.disabled = true;
+    teachButton.textContent = "Applying...";
+    applyButton.click();
+    waitForRemoval(dialog, 15000).then(function () {
+      window.setTimeout(function () { openTeachModalForScene(sceneId); }, 250);
+    }).catch(function (error) {
+      if (!teachButton.isConnected) return;
+      teachButton.disabled = false;
+      teachButton.textContent = "Apply & Teach Auto-Tagger";
+      teachButton.title = String(error && error.message || error);
+    });
+  }
+
+  function setupBrowseEditButton() {
+    var dialog = browseEditDialog();
+    if (!dialog) return;
+    var selectedIds = selectedBrowseSceneIds();
+    var existing = dialog.querySelector("." + BROWSE_BUTTON_CLASS);
+    if (selectedIds.length !== 1) {
+      if (existing) existing.remove();
+      return;
+    }
+    if (existing && existing.getAttribute("data-scene-id") === selectedIds[0]) return;
+    if (existing) existing.remove();
+
+    var applyButton = buttonWithText(dialog, "Apply");
+    if (!applyButton || !applyButton.parentNode) return;
+    var teachButton = el("button", BROWSE_BUTTON_CLASS + " ml-2 btn btn-secondary", "Apply & Teach Auto-Tagger");
+    teachButton.type = "button";
+    teachButton.setAttribute("data-scene-id", selectedIds[0]);
+    teachButton.title = "Apply this scene edit, then preview lessons for the auto-tagger";
+    teachButton.addEventListener("click", applyAndTeachFromBrowse);
+    applyButton.parentNode.insertBefore(teachButton, applyButton);
+  }
+
+  function cleanupModalForRoute() {
+    var backdrop = document.querySelector(".sat-modal-backdrop");
+    if (!backdrop) return;
+    var originPath = backdrop.getAttribute("data-origin-path");
+    if (originPath && originPath !== window.location.pathname) closeModal();
+  }
+
   function setupPanel() {
     var sceneId = sceneIdFromLocation();
     if (!sceneId) {
       requestToken++;
       removePanel();
-      closeModal();
       return;
     }
     var target = panelTarget();
@@ -418,7 +513,11 @@
 
   function scheduleSetup(delay) {
     window.clearTimeout(setupTimer);
-    setupTimer = window.setTimeout(setupPanel, delay === undefined ? 100 : delay);
+    setupTimer = window.setTimeout(function () {
+      setupPanel();
+      setupBrowseEditButton();
+      cleanupModalForRoute();
+    }, delay === undefined ? 100 : delay);
   }
 
   function start() {
@@ -431,10 +530,11 @@
       var panel = document.querySelector("." + PANEL_CLASS);
       if (!sceneId && panel) {
         removePanel();
-        closeModal();
       } else if (sceneId && (!panel || panel.getAttribute("data-scene-id") !== String(sceneId))) {
         scheduleSetup(100);
       }
+      setupBrowseEditButton();
+      cleanupModalForRoute();
     });
     observer.observe(document.body, { childList: true, subtree: true });
     window.setInterval(function () {
@@ -442,10 +542,11 @@
       var panel = document.querySelector("." + PANEL_CLASS);
       if (!sceneId && panel) {
         removePanel();
-        closeModal();
       } else if (sceneId && (!panel || panel.getAttribute("data-scene-id") !== String(sceneId))) {
         scheduleSetup(0);
       }
+      setupBrowseEditButton();
+      cleanupModalForRoute();
     }, 1000);
   }
 

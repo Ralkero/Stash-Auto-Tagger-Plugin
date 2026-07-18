@@ -6,7 +6,7 @@ Embedded JavaScript plugin for Stash v0.30.1+ that tags selected scenes by:
 - artist/creator -> Group
 - featured characters -> Tags under the configured parent tag
 
-This release is safety-first. The core JS defaults to `dryRun: true`, dry-run performs no create/update mutations, review-confidence matches do not apply inferred metadata, groups/tags are additive, and the create hook is not registered. Version `0.2.0` also adds explicit human-taught corrections: fix a scene with Stash's normal editor, click **Teach Auto-Tagger**, review each proposed rule, and save only the lessons you intend.
+This release is safety-first. The core JS defaults to `dryRun: true`, dry-run performs no create/update mutations, review-confidence matches do not apply inferred metadata, groups/tags are additive, and the create hook is not registered. Version `0.2.x` also adds explicit human-taught corrections: fix a scene with Stash's normal editor, preview the proposed lessons, and save only the mappings you intend.
 
 ## Installation
 
@@ -102,12 +102,24 @@ Scripted calls can still force `dryRun: true`.
 
 ## Teaching Corrections
 
+From a scene player page:
+
 1. Open an incorrectly tagged scene.
 2. Use Stash's normal editor to set the correct Studio, Groups, and character Tags, then save the scene.
 3. Click **Teach Auto-Tagger** above the scene details.
 4. Review each proposed mapping. Ambiguous multi-character or multi-Group cases require an explicit selection.
 5. Select **Save selected lessons**.
 6. Optionally select **Preview matching repairs** and confirm the exact existing scenes to repair.
+
+From the main scene browser:
+
+1. Select exactly one scene card.
+2. Click Stash's pencil button to open **Edit 1 Scene**.
+3. Correct the Studio, Groups, and character Tags.
+4. Click **Apply & Teach Auto-Tagger** beside Stash's Apply button.
+5. The plugin lets Stash save the edit first, then opens the same reviewed lesson preview.
+
+The teaching action is intentionally absent from multi-scene bulk edits. A learned relationship must come from one corrected filename and one authoritative scene.
 
 Lessons are stored in Stash plugin configuration under `learnedCorrectionsV1`. Each rule records stable object IDs, names, the source scene, timestamps, revision, and replacement history. The **Learned Corrections** manager can disable a rule or undo the latest teaching event.
 
@@ -168,7 +180,7 @@ Where to look:
 
 Expected log markers:
 
-- `STARTUP version=0.2.0 mode=embedded-js`
+- `STARTUP version=0.2.1 mode=embedded-js`
 - `RUNTIME_ALIAS_INDEX run=...` with counts for indexed Studios, Groups, Tags, and character-to-Studio links
 - `EXISTING_CLOSE_MATCH type=...` when a candidate is resolved to an existing close Stash object before creation
 - `ALIAS_SUGGESTION run=...` when dry-run or suggestion mode finds an alias worth adding

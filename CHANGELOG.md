@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1] - 2026-07-18
+
+### Browse-Page Teaching
+
+- Added **Apply & Teach Auto-Tagger** beside Stash's Apply button when editing exactly one selected scene from the main scene browser.
+- The action first uses Stash's native Apply flow, waits for a successful modal close, and only then previews lessons from the saved metadata.
+- Multi-scene bulk edits intentionally do not expose teaching because one correction cannot be mapped safely to several filenames.
+- Kept browse-page teaching route-aware so its correction preview closes on navigation and cannot leak into another page.
+
 ## [0.2.0] - 2026-07-18
 
 ### Human-Taught Corrections

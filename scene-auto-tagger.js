@@ -13,7 +13,7 @@
  * - If the runtime exposes log/progress helpers, the plugin also attempts to use them.
  */
 
-const PLUGIN_VERSION = "0.2.0";
+const PLUGIN_VERSION = "0.2.1";
 const PLUGIN_ID = "scene-auto-tagger";
 const LEGACY_PLUGIN_ID = "plugin";
 const LEARNED_CORRECTIONS_KEY = "learnedCorrectionsV1";

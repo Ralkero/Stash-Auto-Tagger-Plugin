@@ -2,7 +2,7 @@
 
 ## Current State
 
-- Plugin version is `0.2.0`.
+- Plugin version is `0.2.1`.
 - The manifest is `scene-auto-tagger.yml`, giving the plugin the stable ID `scene-auto-tagger` instead of the legacy generic ID `plugin`.
 - The manifest remains settings-free for Stash v0.30.x compatibility; defaults live in `DEFAULT_CONFIG` inside `scene-auto-tagger.js`.
 - There is no registered `hooks:` block; `Scene.Create.Post` remains disabled by default.
@@ -15,6 +15,7 @@
 - At task start, the plugin now builds a runtime alias index from existing Stash Studios, Groups, Tags, Tag aliases, and Tag parents. This lets many future misses be fixed by editing Stash metadata rather than plugin code.
 - Runtime alias precedence is scripted `aliases` overrides, confirmed human-taught corrections, Stash object names/aliases and tag-parent inference, then embedded fallback aliases.
 - Scene player pages expose **Teach Auto-Tagger** and **Learned Corrections** actions. Teaching is explicit, previewed, revision-checked, persisted through `configurePlugin`, and reversible.
+- Main browse-page `Edit 1 Scene` modals expose **Apply & Teach Auto-Tagger**. The action saves through Stash first; multi-scene edits intentionally do not expose teaching.
 - Learned character-to-Studio rules outrank folder inference. This supports corrections such as Tina Armstrong -> Dead or Alive without globally remapping the `Original Character` folder.
 - Matching existing-scene repairs are a separate preview/apply operation. They can remove only metadata directly attributed to a superseded prediction and preserve every unrelated object.
 - Before creating missing Studios, Groups, or Tags, the plugin now searches existing Stash objects for exact names, aliases, and conservative close matches. This prevents cases like `Nodu` creating a duplicate Group when `NoduSFM` already exists.
@@ -47,10 +48,10 @@
 ## Next Steps In Stash
 
 1. Reload plugins in Stash.
-2. Confirm only one "Scene Auto-Tagger" appears, with plugin ID `scene-auto-tagger` and version `0.2.0`.
+2. Confirm only one "Scene Auto-Tagger" appears, with plugin ID `scene-auto-tagger` and version `0.2.1`.
 3. If the old plugin ID `plugin` also appears, remove the obsolete live `plugin.yml` and reload plugins again.
 4. Do not expect detailed plugin settings in the UI; the manifest is settings-free on purpose.
-5. To teach a correction, edit and save a scene with Stash's normal editor, then click **Teach Auto-Tagger** on that scene page.
+5. To teach from a player page, edit and save a scene, then click **Teach Auto-Tagger**. From the main browser, select one scene, open the pencil editor, and click **Apply & Teach Auto-Tagger**.
 6. Review every proposed rule. Save only intended mappings, then use **Preview matching repairs** for already-affected scenes.
 7. Use **Learned Corrections** to inspect rules, disable one, or undo the latest teaching event.
 8. Run the bulk task from the UI when you want a real apply pass over actionable scenes.

@@ -24,6 +24,7 @@
 .sat-button-secondary { background: #394b59; }
 .sat-button-danger { background: #b83232; border-color: #d14444; }
 .sat-button-icon { width: 34px; padding: 0; font-size: 25px; line-height: 1; }
+.sat-browse-teach-button { white-space: normal; }
 
 .sat-modal-backdrop {
   position: fixed;
