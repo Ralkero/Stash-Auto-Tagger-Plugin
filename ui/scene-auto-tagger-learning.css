@@ -1,0 +1,108 @@
+.sat-teach-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.sat-button {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  min-height: 34px;
+  padding: 6px 12px;
+  color: #f4f7fa;
+  background: #394b59;
+  font: inherit;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+
+.sat-button:hover { background: #465c6d; }
+.sat-button:disabled { cursor: wait; opacity: 0.62; }
+.sat-button-primary { background: #137cbd; border-color: #1995dc; }
+.sat-button-primary:hover { background: #1689cd; }
+.sat-button-secondary { background: #394b59; }
+.sat-button-danger { background: #b83232; border-color: #d14444; }
+.sat-button-icon { width: 34px; padding: 0; font-size: 25px; line-height: 1; }
+
+.sat-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(8, 14, 19, 0.78);
+}
+
+.sat-modal {
+  width: min(920px, 100%);
+  max-height: min(820px, calc(100vh - 40px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #546b7b;
+  border-radius: 6px;
+  color: #eef3f7;
+  background: #202f39;
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.48);
+}
+
+.sat-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #435764;
+}
+
+.sat-modal-title { margin: 0; font-size: 18px; letter-spacing: 0; }
+.sat-modal-body { overflow: auto; padding: 16px; }
+.sat-summary { display: grid; gap: 1px; margin-bottom: 14px; background: #435764; }
+.sat-summary-row { display: grid; grid-template-columns: 110px 1fr 1fr; gap: 12px; padding: 9px 10px; background: #293b47; }
+.sat-rule-list, .sat-repair-list, .sat-manager-list { display: grid; gap: 8px; }
+
+.sat-rule-row,
+.sat-repair-row,
+.sat-manager-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 10px;
+  border: 1px solid #435764;
+  border-radius: 4px;
+  background: #293b47;
+}
+
+.sat-manager-row { grid-template-columns: 1fr auto; align-items: center; }
+.sat-rule-content, .sat-repair-copy, .sat-manager-copy { display: grid; gap: 5px; min-width: 0; }
+.sat-rule-heading { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.sat-rule-signal { color: #9ccdea; overflow-wrap: anywhere; }
+.sat-rule-reason { color: #bdcad2; font-size: 13px; }
+.sat-rule-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sat-rule-target { color: #d5e6ef; }
+.sat-select { min-width: 180px; max-width: 100%; min-height: 32px; border-radius: 3px; color: #f4f7fa; background: #18252e; border: 1px solid #607887; }
+.sat-inline-check { display: inline-flex; align-items: center; gap: 5px; }
+.sat-conflict { margin-top: 5px; padding: 7px; color: #ffd28a; background: #493c24; border-left: 3px solid #e4a33b; }
+.sat-invalid { color: #ff9e9e; }
+
+.sat-modal-actions { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.sat-status, .sat-empty { margin: 10px 0; padding: 10px; border-radius: 4px; background: #293b47; }
+.sat-status-success { color: #c6f6d5; border-left: 3px solid #38a169; }
+.sat-status-warning { color: #ffe6ad; border-left: 3px solid #d69e2e; }
+.sat-status-error { color: #ffd0d0; border-left: 3px solid #e53e3e; }
+.sat-busy { display: flex; align-items: center; gap: 10px; min-height: 80px; justify-content: center; }
+.sat-spinner { width: 20px; height: 20px; border: 2px solid #607887; border-top-color: #31a8ed; border-radius: 50%; animation: sat-spin 0.8s linear infinite; }
+@keyframes sat-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 700px) {
+  .sat-modal-backdrop { padding: 8px; }
+  .sat-modal { max-height: calc(100vh - 16px); }
+  .sat-summary-row { grid-template-columns: 1fr; gap: 4px; }
+  .sat-rule-row, .sat-repair-row { grid-template-columns: auto 1fr; }
+  .sat-manager-row { grid-template-columns: 1fr; }
+  .sat-teach-panel { flex-wrap: wrap; }
+  .sat-button { max-width: 100%; }
+}

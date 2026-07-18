@@ -1,0 +1,62 @@
+name: Scene Auto-Tagger
+description: Safety-first embedded JS auto-tagger with explicit, reversible human-taught corrections.
+version: 0.2.0
+url: https://github.com/Ralkero/Stash-Auto-Tagger-Plugin
+interface: js
+exec:
+  - scene-auto-tagger.js
+errLog: info
+
+tasks:
+  - name: Bulk auto-tag scenes
+    description: Apply auto-tagging to selected scenes, or to every actionable incomplete scene in scope when no scene_ids are supplied.
+    defaultArgs:
+      mode: bulk
+      dryRun: false
+      addNeedsReviewTag: false
+      removeNeedsReviewOnApply: true
+      allowDiscoveredWrites: true
+      sceneDiscoveryLimit: 10000
+      sceneDiscoveryPageSize: 250
+      sceneDiscoveryScanPages: 10000
+      sceneDiscoverySort: id
+      sceneDiscoveryDirection: DESC
+      sceneDiscoveryOnlyUnorganized: true
+      sceneDiscoveryOnlyIncomplete: true
+      sceneDiscoveryIncludeMissingStudioOnly: false
+      sceneDiscoverySkipNeedsReview: true
+      sceneDiscoveryOnlyActionable: true
+      sceneDiscoveryRepairNeedsReview: true
+      sceneDiscoveryPathIncludes: "Rule34"
+      sceneDiscoveryPathExcludes: "Regular Porn|Hentai"
+      autoAliasMode: apply
+      minAutoAliasConfidence: 0.9
+      preferExistingCloseMatches: true
+      closeMatchMinConfidence: 0.92
+      allowTitleFallbackCharacterTags: true
+      strictCharacterTagNames: true
+
+  - name: Bulk auto-tag images by folder
+    description: Apply franchise tags to images based on their folder under Rule34 Pictures. Existing image tags are preserved.
+    defaultArgs:
+      mode: image_folder_tagging
+      dryRun: false
+      imageTaggingPathIncludes: "Rule34 Pictures"
+      imageTaggingPathExcludes: "_Unsorted_Franchise|_Delete_Review|Futa|mp4|zip"
+      imageTaggingLimit: 10000
+      imageTaggingPageSize: 250
+      imageTaggingScanPages: 10000
+      imageTaggingCreateMissingTags: true
+
+ui:
+  javascript:
+    - ui/scene-auto-tagger-learning.js
+  css:
+    - ui/scene-auto-tagger-learning.css
+
+# Intentionally settings-free for Stash v0.30.x compatibility. Detailed settings
+# previously caused YAML unmarshal failures in some v0.30 builds. Runtime defaults,
+# task args, and versioned learned corrections provide configuration instead.
+#
+# Safe defaults remain dryRun=true, allowOverwriteExistingMetadata=false, and no
+# Scene.Create.Post hook. The visible bulk tasks explicitly opt into live writes.
