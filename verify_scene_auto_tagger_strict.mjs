@@ -46,6 +46,70 @@ assertSameArray(
   ["2B"]
 );
 
+for (const [path, expected] of [
+  ["E:\\Rule34\\Final Fantasy\\Artist - Tifa Mating Press [4K].mp4", ["Tifa Lockhart"]],
+  ["E:\\Rule34\\Overwatch\\Artist - Cute Dva Washroom Sex [1080P].mp4", ["D.Va"]],
+  ["E:\\Rule34\\Street Fighter\\Artist - Can Juri Handle It [4K].mp4", ["Juri Han"]],
+  ["E:\\Rule34\\Nier Automata\\Artist - Horny 2Booty [4K].mp4", ["2B"]],
+  ["E:\\Rule34\\Elden Ring\\Artist - Maidenless No More [1080P].mp4", []],
+  ["E:\\Rule34\\Nioh\\Artist - Nioh Missionary (Maria) [4K].mp4", ["Maria"]]
+]) {
+  assertSameArray(
+    charsFor(path, { allowTitleFallbackCharacterTags: true }),
+    expected
+  );
+}
+
+assertSameArray(
+  charsFor(
+    "E:\\Rule34\\Final Fantasy\\KnownArtist - Lysandra Vale - Arrival [4K].mp4",
+    { allowTitleFallbackCharacterTags: true }
+  ),
+  ["Lysandra Vale"]
+);
+
+const removedMalformedCharacterTags = [
+  "Calming Raven", "Cammy At The", "Cammy Elevator", "Cammy Sf",
+  "Cammy Throat Training", "Can Juri Handle It", "Cloud Triple Feature",
+  "Cute Dva Washroom Sex", "Dimitrescu Daughters", "Divine Hospitality Sif",
+  "Dream Dive Judy", "Dva Arcade", "Dva Bounces On It", "Dva Bouncing",
+  "Dva Bouncing On Cock", "Dva Bouncing On It", "Dva Doggystyle",
+  "Dva Double Penetrated", "Dva Gamer Girl", "Dva Get Tickets", "Dva Gets A D",
+  "Dva Has Some Fun", "Dva Hot Shower", "Dva Mating Press", "Dva Pink Dress",
+  "Dva Shaking Ass", "Dva Suck", "Evelynn 4some", "Get Jinxed", "Good Times",
+  "Horny 2booty", "In Nyotengu", "Ivy On Top", "Jessie Eating Tifas Ass",
+  "Judy Braindance", "Kazumi Irrumatio", "Lara Unleased Ep", "Leon Overtime",
+  "Maidenless No More", "Male", "Nioh", "Panam Doggystyle",
+  "Panam Mating Press", "Panam Suck", "Panam The Best Girl", "Raven Craves It",
+  "Raven Dc", "Raven Gothic Fantasy", "Raven Halloween", "Raven Lucky Day",
+  "Schoolgirl Dva Creampied", "Sex Doll Dva", "Steps", "Takes Leon",
+  "Tempting Training", "Test Drive", "Tifa 100k Followers",
+  "Tifa Backing Onto It", "Tifa Chair", "Tifa Costa Del Sol", "Tifa Femdom",
+  "Tifa From Behind", "Tifa Is Angry", "Tifa Is Lonely", "Tifa Likes To Suck",
+  "Tifa Maid Service", "Tifa Mating", "Tifa Mating Press", "Tifa Nightclub",
+  "Tifa Plays Final Fantasy", "Tifa Preworkout", "Tifa Rubbing", "Tifa Shower",
+  "Tifa Strip Searched", "Tifa The Heavenly Beauty", "Tifa Throated Cumshot",
+  "Tifa Titjob", "Tifa Wants It Inside", "Tifa Work", "Toy Hunter Yuffie",
+  "Twin Moon Knight", "Widow Cockrider", "Widow Sharing", "Wrapped In Ivy",
+  "Yorha", "Yorha Android", "Yorha Type A No", "Yuffie The"
+];
+
+for (const malformedName of removedMalformedCharacterTags) {
+  const parsed = api.tokenizePathAndName(
+    "E:\\Rule34\\Final Fantasy\\KnownArtist - " + malformedName + " [4K].mp4",
+    "",
+    ""
+  );
+  const inferred = api.parseCandidates(parsed, aliases, {
+    allowTitleFallbackCharacterTags: true,
+    strictCharacterTagNames: true
+  });
+  assert.ok(
+    !inferred.characters.some(character => api.normalize(character.name) === api.normalize(malformedName)),
+    "malformed character tag was inferred again: " + malformedName
+  );
+}
+
 assertSameArray(
   charsFor("E:\\Rule34\\Nier Automata\\Artist - 2bb Kaine V2 [1080p].mp4"),
   ["2B", "Kaine"]

@@ -135,7 +135,7 @@ As of `0.1.18`, the plugin builds a runtime alias index from Stash itself at the
 
 The plugin can also learn high-confidence aliases back into Stash object metadata. In default core config this is suggestion-only. The visible UI task button sets `autoAliasMode: apply`, so after a successful apply-confidence match the plugin may add the detected filename token as an alias on the matched Studio, Group, or Tag. Alias updates are additive only. Existing aliases are preserved, and alias update failures are logged without aborting the scene metadata update.
 
-The visible scene task also enables strict title fallback for missing character Tags. Fallback reads only the first character segment before subtitle dashes, requires a franchise folder or trusted existing creator Group, rejects generic/action-like names, and searches exact names, aliases, compact spellings, and close Stash matches before creating a new Tag under `Characters`. Raw title fallback is disabled under `Rule34 Pictures`, where file naming is variant-heavy; existing aliases can still match there.
+The visible scene task also enables strict title fallback for missing character Tags. Fallback reads only the first character segment before subtitle dashes, requires a franchise folder or trusted existing creator Group, and searches exact names, aliases, compact spellings, and close Stash matches before considering creation. If any known character alias appears in a segment, the plugin suppresses raw fallback for that entire segment; `Tifa Mating Press` therefore resolves only to `Tifa Lockhart`. Unknown creation is limited to clean atomic names of at most three tokens and rejects action, subtitle, variant, franchise, creator, organization, and collective vocabulary. Raw title fallback is disabled under `Rule34 Pictures`, where file naming is variant-heavy; existing aliases can still match there.
 
 Recommended Stash metadata pattern:
 
@@ -180,7 +180,7 @@ Where to look:
 
 Expected log markers:
 
-- `STARTUP version=0.2.1 mode=embedded-js`
+- `STARTUP version=0.2.2 mode=embedded-js`
 - `RUNTIME_ALIAS_INDEX run=...` with counts for indexed Studios, Groups, Tags, and character-to-Studio links
 - `EXISTING_CLOSE_MATCH type=...` when a candidate is resolved to an existing close Stash object before creation
 - `ALIAS_SUGGESTION run=...` when dry-run or suggestion mode finds an alias worth adding

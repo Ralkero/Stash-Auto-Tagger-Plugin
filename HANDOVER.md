@@ -2,7 +2,7 @@
 
 ## Current State
 
-- Plugin version is `0.2.1`.
+- Plugin version is `0.2.2`.
 - The manifest is `scene-auto-tagger.yml`, giving the plugin the stable ID `scene-auto-tagger` instead of the legacy generic ID `plugin`.
 - The manifest remains settings-free for Stash v0.30.x compatibility; defaults live in `DEFAULT_CONFIG` inside `scene-auto-tagger.js`.
 - There is no registered `hooks:` block; `Scene.Create.Post` remains disabled by default.
@@ -48,7 +48,7 @@
 ## Next Steps In Stash
 
 1. Reload plugins in Stash.
-2. Confirm only one "Scene Auto-Tagger" appears, with plugin ID `scene-auto-tagger` and version `0.2.1`.
+2. Confirm only one "Scene Auto-Tagger" appears, with plugin ID `scene-auto-tagger` and version `0.2.2`.
 3. If the old plugin ID `plugin` also appears, remove the obsolete live `plugin.yml` and reload plugins again.
 4. Do not expect detailed plugin settings in the UI; the manifest is settings-free on purpose.
 5. To teach from a player page, edit and save a scene, then click **Teach Auto-Tagger**. From the main browser, select one scene, open the pencil editor, and click **Apply & Teach Auto-Tagger**.

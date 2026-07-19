@@ -1,6 +1,6 @@
 name: Scene Auto-Tagger
 description: Safety-first embedded JS auto-tagger with explicit, reversible human-taught corrections.
-version: 0.2.1
+version: 0.2.2
 url: https://github.com/Ralkero/Stash-Auto-Tagger-Plugin
 interface: js
 exec:

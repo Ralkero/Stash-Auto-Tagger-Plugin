@@ -13,7 +13,7 @@
  * - If the runtime exposes log/progress helpers, the plugin also attempts to use them.
  */
 
-const PLUGIN_VERSION = "0.2.1";
+const PLUGIN_VERSION = "0.2.2";
 const PLUGIN_ID = "scene-auto-tagger";
 const LEGACY_PLUGIN_ID = "plugin";
 const LEARNED_CORRECTIONS_KEY = "learnedCorrectionsV1";
@@ -122,7 +122,21 @@ const CHARACTER_TITLE_STOP_WORDS = makeSet([
   "session", "bonking", "realistic", "allure", "pov", "thighjob", "buttplug",
   "academy", "cademy", "mk", "morning", "workout", "foursome", "vortex", "club",
   "bonus", "serviced", "bikini", "clothed", "topless", "dressonly", "toponly",
-  "creampie", "pole", "dance", "3p", "face", "baldachin"
+  "creampie", "pole", "dance", "3p", "face", "baldachin",
+  "arcade", "backing", "beauty", "bounces", "bouncing", "braindance",
+  "calming", "can", "chair", "cock", "cockrider", "costa", "craves",
+  "creampied", "cute", "daughters", "dc", "del", "demons", "dive",
+  "divine", "doggystyle", "double", "dream", "eating", "elevator",
+  "ep", "feature", "femdom", "followers", "from", "gamer", "get",
+  "gets", "girl", "good", "gothic", "handle", "has", "heavenly",
+  "horny", "hospitality", "hot", "in", "inside", "irrumatio", "is",
+  "likes", "lonely", "lucky", "maid", "maidenless", "mating", "more", "nightclub",
+  "no", "on", "overtime", "penetrated", "pink", "plays", "press",
+  "preworkout", "rubbing", "schoolgirl", "searched", "service", "sex",
+  "sharing", "shaking", "some", "steps", "strip", "suck", "takes",
+  "tempting", "test", "the", "throated", "tickets", "times", "titjob",
+  "toy", "training", "triple", "unleashed", "unleased", "wants", "washroom", "work",
+  "wrapped"
 ]);
 
 const CHARACTER_TITLE_SUFFIX_WORDS = makeSet([
@@ -156,13 +170,17 @@ const GENERIC_TITLE_CHARACTER_NAMES = makeSet([
   "catwalk", "kda", "unknown", "original character", "top", "bottom", "sound",
   "dress", "variant", "version", "academy", "view", "vr1", "vr2", "vr3",
   "plugsuit", "censor", "poke night", "pokemon yuri", "fromsoftware",
-  "vnude nopiercing"
+  "vnude nopiercing", "dimitrescu", "dimitrescu daughters", "twin moon knight",
+  "yorha", "yorha android", "yorha type a no"
 ]);
 
 const NON_CHARACTER_TAG_NAMES = makeSet([
   "needs review", "character", "characters", "animated", "animation", "animations",
   "loop", "nude", "kda",
-  "4k", "1080p", "720p", "vr", "video", "scene", "scenes", "unknown"
+  "4k", "1080p", "720p", "vr", "video", "scene", "scenes", "unknown",
+  "male", "female",
+  "dimitrescu daughters", "twin moon knight", "yorha", "yorha android",
+  "yorha type a no"
 ]);
 
 const CLOSE_MATCH_SUFFIXES = [
@@ -2001,10 +2019,33 @@ function segmentHasExistingCharacterMatch(segment, existingMatches) {
   if (!segmentNorm) return false;
   for (const match of existingMatches || []) {
     if (containsPhrase(segmentNorm, normalize(match && match.name))) return true;
+    if (containsPhrase(segmentNorm, normalize(match && match.aliasText))) return true;
     if (segmentCompact && segmentCompact === compactNormalize(match && match.aliasText)) return true;
     if (segmentCompact && segmentCompact === compactNormalize(match && match.name)) return true;
   }
   return false;
+}
+
+function aliasMapContainsTaxonomyName(map, name) {
+  const target = normalize(name);
+  if (!target) return false;
+  for (const key of Object.keys(map || {})) {
+    if (normalize(key) === target || normalize(map[key]) === target) return true;
+  }
+  return false;
+}
+
+function isSafeUnknownCharacterName(rawSegment, fallbackName, aliases) {
+  const norm = normalize(fallbackName);
+  const words = norm.split(/\s+/).filter(Boolean);
+  if (!norm || !words.length || words.length > 3) return false;
+  if (GENERIC_TITLE_CHARACTER_NAMES[norm] || NON_CHARACTER_TAG_NAMES[norm]) return false;
+  if (aliasMapContainsTaxonomyName(aliases && aliases.studios, fallbackName)) return false;
+  if (aliasMapContainsTaxonomyName(aliases && aliases.groups, fallbackName)) return false;
+  if (words.some(word => JUNK_CHARACTER_TOKENS[word] || CHARACTER_TITLE_STOP_WORDS[word])) return false;
+  if (words.some(word => /\d/.test(word) && !/^(?:[a-z]\d|\d[a-z])$/i.test(word))) return false;
+  if (/[@\[\]{}<>]/.test(String(rawSegment || ""))) return false;
+  return true;
 }
 
 function inferTitleCharacterCandidates(titleRaw, aliases, foldersRaw, existingMatches, configInput, contextInput) {
@@ -2041,6 +2082,7 @@ function inferTitleCharacterCandidates(titleRaw, aliases, foldersRaw, existingMa
     if (segmentHasExistingCharacterMatch(segment, existingMatches)) continue;
     const fallbackName = canonicalizeTitleName(segment);
     const fallbackKey = normalize(fallbackName);
+    if (!isSafeUnknownCharacterName(segment, fallbackName, aliases)) continue;
     const name = aliases.characters[fallbackKey] || fallbackName;
     const key = normalize(name);
     if (!fallbackKey || !key || seen[key] || GENERIC_TITLE_CHARACTER_NAMES[fallbackKey]) continue;
@@ -2721,10 +2763,12 @@ function hasSuspiciousCharacterFallbackName(name) {
   const norm = normalize(name);
   if (!norm) return true;
   const words = norm.split(/\s+/).filter(Boolean);
-  if (!words.length || words.length > 4) return true;
+  if (!words.length || words.length > 3) return true;
   if (words.length === 1 && COLOR_ONLY_TOKENS[words[0]]) return true;
   if (words.length === 1 && words[0].length < 3) return true;
+  if (GENERIC_TITLE_CHARACTER_NAMES[norm]) return true;
   if (words.some(w => JUNK_CHARACTER_TOKENS[w] || NON_CHARACTER_TAG_NAMES[w] || CHARACTER_TITLE_STOP_WORDS[w])) return true;
+  if (words.some(w => /\d/.test(w) && !/^(?:[a-z]\d|\d[a-z])$/i.test(w))) return true;
   return false;
 }
 

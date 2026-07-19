@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.2] - 2026-07-19
+
+### Character-Only Tag Guard
+
+- Prevented title fallback from creating a second tag when a known character alias already appears inside the same title segment.
+- Restricted unknown character creation to clean atomic names of at most three tokens.
+- Rejected action, subtitle, variant, franchise, creator, organization, and collective names before character Tag creation.
+- Added regression coverage for the malformed title patterns found during the live Characters hierarchy cleanup.
+
 ## [0.2.1] - 2026-07-18
 
 ### Browse-Page Teaching
