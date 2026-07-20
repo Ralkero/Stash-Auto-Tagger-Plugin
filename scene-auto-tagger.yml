@@ -1,6 +1,6 @@
 name: Scene Auto-Tagger
 description: Safety-first embedded JS auto-tagger with explicit, reversible human-taught corrections.
-version: 0.2.2
+version: 0.6.2
 url: https://github.com/Ralkero/Stash-Auto-Tagger-Plugin
 interface: js
 exec:
@@ -51,8 +51,12 @@ tasks:
 ui:
   javascript:
     - ui/scene-auto-tagger-learning.js
+    - ui/scene-descriptor-review.js
+    - ui/scene-descriptor-card-badges.js
+    - ui/scene-descriptor-browser.js
   css:
     - ui/scene-auto-tagger-learning.css
+    - ui/scene-descriptor-review.css
 
 # Intentionally settings-free for Stash v0.30.x compatibility. Detailed settings
 # previously caused YAML unmarshal failures in some v0.30 builds. Runtime defaults,

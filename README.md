@@ -8,6 +8,42 @@ Embedded JavaScript plugin for Stash v0.30.1+ that tags selected scenes by:
 
 This release is safety-first. The core JS defaults to `dryRun: true`, dry-run performs no create/update mutations, review-confidence matches do not apply inferred metadata, groups/tags are additive, and the create hook is not registered. Version `0.2.x` also adds explicit human-taught corrections: fix a scene with Stash's normal editor, preview the proposed lessons, and save only the mappings you intend.
 
+## Scene Descriptor Review
+
+Version `0.6.2` adds separate, custom-field-backed review and browsing surfaces for scene descriptors. It does not put sex acts, positions, or endings into Stash's Tags/Characters metadata.
+
+Open a Scenes browse or player page and click **Descriptor Review**. The dedicated review page plays unreviewed Rule34 scenes one at a time with Stash's native scene player and provides independent multi-value controls for:
+
+- **Sex Acts & Positions**
+- **Endings** such as `Loop`, `Creampie`, and `Swallow`
+
+The player retains Stash's standard controls, source selection, playback speeds, timeline hover thumbnails, scene markers, and generated frame scrubber. A separate eighteen-frame **Scene Overview** samples the generated VTT storyboard across the full scene in three rows of six. Before choosing those frames, the plugin checks the actual sprite crops for brightness, contrast, transparency, and visible detail so black or empty frames are excluded. Clicking any overview frame seeks directly to that time, and the scene title beneath the overview links to the scene's normal Stash playback page.
+
+Stash's player shortcuts remain active throughout the review page after clicking descriptor chips, action buttons, or other review controls. This includes Space for play/pause, `A`/`D` for backward/forward seeking, arrow-key seeking and volume, `M` for mute, `F` for fullscreen, numeric percentage seeking, and Stash's loop controls. `A`/`D` start at five seconds; `Ctrl+Plus` and `Ctrl+Minus` adjust that interval one second at a time and retain it between sessions. Supported shortcuts are also forwarded while a descriptor text field is active without blocking normal text entry.
+
+The **Keyboard Shortcuts** panel below **Save & Next** is both a cheat sheet and a keybind editor for playback, seeking, and review actions. Click any displayed binding and press a replacement key or multi-key combination. `Delete` or `Backspace` clears the selected binding, `Escape` cancels capture, and **Reset Defaults** restores the complete default layout. Bindings persist in local storage across scenes and review sessions; assigning a combination already in use automatically clears its previous action so it cannot fire twice.
+
+Seek actions show a short fading overlay on the player. Keyboard seeks report their signed interval, percentage seeks report their target, and timeline, scrubber, or overview-frame jumps display the destination timestamp.
+
+Filename values are preselected from a controlled alias vocabulary. Press Enter in either search field to add a new value when the vocabulary does not contain it. **Save & Next** writes only these plugin-owned scene custom fields:
+
+New values immediately join the appropriate shared picker list, remain available on later scenes, and persist when Descriptor Review is reopened. The picker also learns values already saved on Rule34 scenes, so a descriptor only needs to be entered once. Adding a picker value by itself does not modify scene metadata; the current scene is still updated only by **Save & Next**.
+
+```text
+r34_sex_acts_positions
+r34_ending_descriptors
+r34_scene_descriptor_status
+r34_scene_descriptor_source
+```
+
+Values are stored as JSON arrays so every descriptor remains distinct. **Not Applicable** records a reviewed scene with empty descriptor arrays. **Undo Last Save** restores only fields owned by this feature, including removing a field when it did not exist before the save. Existing Studio, Groups, Tags/Characters, performers, variant custom fields, and all unrelated metadata are untouched.
+
+The queue is limited to media paths under `Rule34`, excludes `_r34_*` holding folders, and omits scenes already marked `reviewed` or `not_applicable`. Closing the review window preserves its queue position in browser local storage.
+
+On the Scenes browsing page, reviewed scenes with saved descriptor values show a list-check icon and combined descriptor count in the same bottom metadata row as Stash's Tag/Character, Author, and variant counts. Hovering the indicator summarizes the saved values; clicking it opens a categorized list of every saved **Sex Acts & Positions** and **Endings** value. Empty and Not Applicable scenes do not show a badge.
+
+The main Stash toolbar includes **Descriptors** immediately after **Characters**. That page loads every distinct saved value with its scene count and supports live text search. Selecting a value keeps the descriptor index visible and loads matching scenes directly on the same page using Stash's server-side custom-field filtering and native scene cards. The results retain card hover previews, metadata indicators, direct scene navigation, and 40-scene pagination.
+
 ## Installation
 
 1. Put this folder in `%USERPROFILE%\.stash\plugins\scene-auto-tagger`.

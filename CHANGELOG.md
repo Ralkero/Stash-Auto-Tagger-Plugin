@@ -1,5 +1,89 @@
 # Changelog
 
+## 0.6.2 - 2026-07-20
+
+- Linked the scene title beneath Descriptor Review's frame overview directly to the scene's normal Stash playback page.
+- Added visible hover and keyboard-focus styling without changing the overview layout.
+
+## 0.6.1 - 2026-07-20
+
+- Added pixel-level quality inspection for the eighteen-frame Scene Overview.
+- Rejected near-black, transparent, overexposed-uniform, and otherwise empty storyboard crops.
+- Selected the highest-quality usable frame within each timeline region while preserving chronological coverage.
+- Avoided filling an overview slot with a rejected frame when fewer than eighteen usable frames exist.
+
+## 0.6.0 - 2026-07-20
+
+- Added a compact Keyboard Shortcuts cheat sheet beneath Save & Next in Descriptor Review.
+- Added persistent rebinding for 21 playback, seeking, and review actions, including multi-key combinations.
+- Added direct review bindings for Previous, Skip, Save & Next, Not Applicable, and Undo Last Save.
+- Added capture feedback, Escape-to-cancel, Delete/Backspace-to-clear, conflict resolution, and Reset Defaults.
+- Kept native `0-9` timeline-percentage seeking available and identified separately in the shortcut panel.
+
+## 0.5.4 - 2026-07-20
+
+- Added centered, fading player feedback for keyboard seeks, percentage seeks, overview-frame jumps, and native timeline or scrubber seeks.
+- Added `Ctrl+Plus` and `Ctrl+Minus` to increase or decrease the `A`/`D` seek interval by one second.
+- Persisted the adjustable seek interval between Descriptor Review sessions, bounded from one to sixty seconds.
+
+## 0.5.3 - 2026-07-20
+
+- Assigned `A` and `D` as the dedicated five-second seek backward and forward shortcuts throughout Descriptor Review.
+- Kept ordinary Left/Right seeking at ten seconds and Ctrl/Alt-modified seeking at sixty seconds.
+- Expanded Scene Overview from six frames to eighteen evenly distributed frames in three rows of six.
+
+## 0.5.2 - 2026-07-20
+
+- Promoted newly entered descriptor values into the shared category picker immediately.
+- Kept custom Sex Acts & Positions and Endings available while moving between scenes and after reopening Descriptor Review.
+- Merged descriptor values already saved across the Rule34 library into the appropriate picker vocabulary.
+- Preserved explicit Save behavior: adding a vocabulary value does not alter scene metadata until the scene is saved.
+
+## 0.5.1 - 2026-07-20
+
+- Made Stash player keyboard shortcuts work from anywhere on the Descriptor Review page, including after clicking review controls.
+- Preserved native Stash seek increments and modifier behavior for arrow keys, playback, mute, fullscreen, loop, volume, percentage seek, and bracket seek shortcuts.
+- Removed the conflicting `Alt+Left/Right` scene-navigation override and prevented shortcuts originating inside the player from firing twice.
+- Kept descriptor text fields editable while forwarding supported player shortcuts.
+
+## 0.5.0 - 2026-07-20
+
+- Rebuilt Descriptor Review as a native Stash plugin route so it can use Stash's real `ScenePlayer` within the required React and GraphQL contexts.
+- Added the normal Stash player controls, playback-rate options, timeline hover thumbnails, markers, source selection, and generated frame scrubber beneath the timeline.
+- Added a six-frame Scene Overview sampled from the beginning, middle, and end of Stash's existing VTT storyboard.
+- Made overview frames seek the native player when clicked, with timestamp labels and a basic-player fallback if the native component cannot load.
+- Kept descriptor Save, Not Applicable, Undo, review progress, and custom-field isolation unchanged.
+
+## 0.4.0 - 2026-07-20
+
+- Added a top-level **Descriptors** navigation entry beside **Characters**.
+- Added a dedicated searchable descriptor browser with separate Sex Acts & Positions and Endings sections.
+- Added distinct-scene counts for every saved descriptor value.
+- Selecting a value now loads matching scenes directly on the Descriptors page using a real server-side custom-field filter.
+- Added a two-pane browser with persistent descriptor selection, native Stash scene cards, hover previews, metadata indicators, direct navigation, and 40-scene pagination.
+
+## 0.3.2 - 2026-07-20
+
+- Made the scene-card descriptor count a keyboard-accessible button.
+- Clicking the indicator now opens a viewport-aware categorized list of every saved descriptor on the scene.
+- Added outside-click, Escape, scroll, resize, route-change, and second-click dismissal.
+
+## 0.3.1 - 2026-07-20
+
+- Added a scene-card descriptor indicator beside the existing metadata counts on the Scenes browsing page.
+- The indicator shows the combined unique descriptor count and lists both custom-field categories in its tooltip.
+- Batched visible-scene queries avoid one GraphQL request per card.
+- Save and Undo now refresh any visible scene-card indicator immediately.
+
+## 0.3.0 - 2026-07-20
+
+- Added a full-screen one-scene-at-a-time Scene Descriptor Review queue.
+- Added separate custom-field-backed Sex Acts & Positions and Endings categories.
+- Added controlled filename detection for the reviewed Organizer ordering, including compound terms such as `Anal Doggystyle`, `POV Cowgirl`, and `Prone Bone`.
+- Added searchable multi-select chips, custom value entry, Save & Next, Skip, Previous, Not Applicable, and field-scoped undo.
+- Kept descriptor writes completely separate from Stash Tags/Characters and all unrelated scene metadata.
+- Added persistent review progress and Rule34-only discovery with holding-folder exclusions.
+
 ## [0.2.2] - 2026-07-19
 
 ### Character-Only Tag Guard

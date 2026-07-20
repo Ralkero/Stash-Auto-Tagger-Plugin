@@ -13,7 +13,7 @@
  * - If the runtime exposes log/progress helpers, the plugin also attempts to use them.
  */
 
-const PLUGIN_VERSION = "0.2.2";
+const PLUGIN_VERSION = "0.6.2";
 const PLUGIN_ID = "scene-auto-tagger";
 const LEGACY_PLUGIN_ID = "plugin";
 const LEARNED_CORRECTIONS_KEY = "learnedCorrectionsV1";
@@ -4697,7 +4697,7 @@ function taskModeFromInput(rawInput) {
   return normalize(raw.mode || argsMap.mode || "");
 }
 
-(function main() {
+function main() {
   const embeddedInput = getEmbeddedInput();
   const mode = taskModeFromInput(embeddedInput);
   if ([
@@ -4710,4 +4710,19 @@ function taskModeFromInput(rawInput) {
     return runImageFolderTagTask(embeddedInput, getEmbeddedRuntime());
   }
   return runBulkTask(embeddedInput, getEmbeddedRuntime());
-})();
+}
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    EMBEDDED_ALIASES,
+    buildRuntimeOptions,
+    normalize,
+    normalizeAliasMap,
+    tokenizePathAndName,
+    parseCandidates,
+    processScene,
+    sceneNeedsAutoTagging
+  };
+} else {
+  main();
+}

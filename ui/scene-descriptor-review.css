@@ -1,0 +1,851 @@
+.sat-descriptor-launch {
+  position: fixed;
+  right: 18px;
+  bottom: 76px;
+  z-index: 1035;
+  border: 1px solid #57b7a5;
+  border-radius: 6px;
+  background: #173f3a;
+  color: #f6fffd;
+  padding: 8px 12px;
+  font: 600 13px "Segoe UI", sans-serif;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+.sat-descriptor-launch:hover { background: #21584f; }
+
+.sat-descriptor-card-badge {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  gap: 4px;
+  line-height: 1;
+  margin-left: 10px;
+  opacity: 0.9;
+  padding: 0 2px;
+  vertical-align: middle;
+}
+
+.sat-descriptor-card-badge:hover { opacity: 1; }
+
+.sat-descriptor-card-badge:focus-visible {
+  border-radius: 3px;
+  outline: 2px solid #57b7a5;
+  outline-offset: 2px;
+}
+
+.sat-descriptor-card-icon {
+  height: 14px;
+  width: 14px;
+}
+
+.sat-descriptor-card-count {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sat-descriptor-card-popover {
+  background: #1b2024;
+  border: 1px solid rgba(87, 183, 165, 0.58);
+  border-radius: 6px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.46);
+  color: #f2f5f7;
+  max-height: min(420px, calc(100vh - 16px));
+  overflow: auto;
+  padding: 12px;
+  position: fixed;
+  z-index: 10060;
+}
+
+.sat-descriptor-card-popover h3 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.sat-descriptor-card-popover-section + .sat-descriptor-card-popover-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.sat-descriptor-card-popover-section h4 {
+  color: #9fd9ce;
+  font-size: 12px;
+  margin: 0 0 7px;
+}
+
+.sat-descriptor-card-popover-section ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sat-descriptor-card-popover-section li {
+  background: #273337;
+  border: 1px solid #46565c;
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 4px 7px;
+}
+
+.sat-descriptor-nav-item .sat-descriptor-nav-icon,
+.sat-descriptor-nav-icon {
+  height: 16px;
+  margin-right: 5px;
+  width: 16px;
+}
+
+.sat-descriptor-browser {
+  color: #f1f3f4;
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 24px clamp(16px, 3vw, 36px) 48px;
+}
+
+.sat-descriptor-browser-header {
+  align-items: flex-end;
+  border-bottom: 1px solid #3b464b;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+}
+
+.sat-descriptor-browser-header h1 {
+  font-size: 26px;
+  margin: 0 0 5px;
+}
+
+.sat-descriptor-browser-header p {
+  color: #aeb8bd;
+  margin: 0;
+}
+
+.sat-descriptor-browser-summary {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+}
+
+.sat-descriptor-browser-summary strong { font-size: 24px; }
+.sat-descriptor-browser-summary span { color: #aeb8bd; font-size: 12px; }
+
+.sat-descriptor-browser-search-wrap {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sat-descriptor-browser-search-wrap input {
+  background: #151a1d;
+  border: 1px solid #536168;
+  border-radius: 5px;
+  color: #fff;
+  flex: 1 1 auto;
+  height: 38px;
+  min-width: 0;
+  padding: 7px 10px;
+}
+
+.sat-descriptor-browser-search-wrap input:focus {
+  border-color: #57b7a5;
+  outline: 2px solid rgba(87, 183, 165, 0.22);
+}
+
+.sat-descriptor-browser-search-wrap button {
+  background: #303a3f;
+  border: 1px solid #536168;
+  border-radius: 5px;
+  color: #f1f3f4;
+  padding: 0 12px;
+}
+
+.sat-descriptor-browser-workspace {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(260px, 310px) minmax(0, 1fr);
+}
+
+.sat-descriptor-browser-sidebar {
+  align-self: start;
+  max-height: calc(100vh - 170px);
+  overflow: auto;
+  padding-right: 5px;
+  position: sticky;
+  top: 12px;
+}
+
+.sat-descriptor-browser-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.sat-descriptor-browser-group {
+  border: 1px solid #46565c;
+  border-radius: 6px;
+  min-width: 0;
+  padding: 16px;
+}
+
+.sat-descriptor-browser-group-heading {
+  align-items: baseline;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.sat-descriptor-browser-group-heading h2 {
+  font-size: 17px;
+  margin: 0;
+}
+
+.sat-descriptor-browser-group-heading span {
+  color: #9aa7ad;
+  font-size: 12px;
+}
+
+.sat-descriptor-browser-values {
+  display: grid;
+  gap: 7px;
+}
+
+.sat-descriptor-browser-value {
+  align-items: center;
+  background: #20282c;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #f2f5f7;
+  display: flex;
+  justify-content: space-between;
+  min-height: 36px;
+  padding: 7px 9px;
+  text-align: left;
+  width: 100%;
+}
+
+.sat-descriptor-browser-value:hover,
+.sat-descriptor-browser-value:focus-visible {
+  background: #273c3a;
+  border-color: #57b7a5;
+  outline: none;
+}
+
+.sat-descriptor-browser-value small {
+  background: #354147;
+  border-radius: 4px;
+  font-size: 11px;
+  min-width: 25px;
+  padding: 2px 6px;
+  text-align: center;
+}
+
+.sat-descriptor-browser-loading,
+.sat-descriptor-browser-empty,
+.sat-descriptor-browser-error {
+  color: #aeb8bd;
+  padding: 20px 4px;
+}
+
+.sat-descriptor-browser-error { color: #ffaaa3; }
+
+.sat-descriptor-browser-results {
+  min-width: 0;
+}
+
+.sat-descriptor-browser-results-heading {
+  align-items: center;
+  border-bottom: 1px solid #46565c;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  min-height: 66px;
+  padding: 0 2px 12px;
+}
+
+.sat-descriptor-browser-results-heading small {
+  color: #9fd9ce;
+  display: block;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.sat-descriptor-browser-results-heading h2 {
+  font-size: 21px;
+  margin: 0;
+}
+
+.sat-descriptor-browser-results-heading span {
+  color: #aeb8bd;
+  font-size: 12px;
+}
+
+.sat-descriptor-browser-results-heading button,
+.sat-descriptor-browser-pagination button {
+  background: #303a3f;
+  border: 1px solid #536168;
+  border-radius: 5px;
+  color: #f1f3f4;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+
+.sat-descriptor-browser-results-heading button:hover,
+.sat-descriptor-browser-pagination button:hover:not(:disabled) {
+  border-color: #57b7a5;
+}
+
+.sat-descriptor-browser-pagination button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.sat-descriptor-browser-pagination {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.sat-descriptor-browser-pagination span {
+  color: #aeb8bd;
+  font-size: 12px;
+}
+
+.sat-descriptor-browser-results-empty {
+  border: 1px dashed #46565c;
+  border-radius: 6px;
+  color: #aeb8bd;
+  padding: 34px 22px;
+  text-align: center;
+}
+
+.sat-descriptor-browser-results-empty h2 {
+  color: #f1f3f4;
+  font-size: 19px;
+  margin: 0 0 7px;
+}
+
+.sat-descriptor-browser-results-empty p { margin: 0; }
+
+.sat-descriptor-browser-scene-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+.sat-descriptor-browser-scene-grid .scene-card {
+  margin: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.sat-descriptor-result-card {
+  background: #2a353b;
+  border: 1px solid #46565c;
+  border-radius: 5px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.sat-descriptor-result-card-link {
+  color: #f2f5f7;
+  display: block;
+  text-decoration: none;
+}
+
+.sat-descriptor-result-media {
+  aspect-ratio: 16 / 9;
+  background: #111;
+  overflow: hidden;
+  position: relative;
+}
+
+.sat-descriptor-result-media img,
+.sat-descriptor-result-media video {
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+}
+
+.sat-descriptor-result-media video { opacity: 0; }
+.sat-descriptor-result-card:hover .sat-descriptor-result-media video { opacity: 1; }
+
+.sat-descriptor-result-specs {
+  background: rgba(0, 0, 0, 0.7);
+  bottom: 6px;
+  font-size: 11px;
+  padding: 3px 5px;
+  position: absolute;
+  right: 6px;
+  z-index: 2;
+}
+
+.sat-descriptor-result-card h3 {
+  font-size: 14px;
+  line-height: 1.3;
+  margin: 0;
+  min-height: 54px;
+  overflow-wrap: anywhere;
+  padding: 9px 10px;
+}
+
+.sat-descriptor-result-meta {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 10px;
+}
+
+.sat-descriptor-result-meta span {
+  color: #c4cdd1;
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .sat-descriptor-browser-workspace { grid-template-columns: 1fr; }
+  .sat-descriptor-browser-sidebar { max-height: none; overflow: visible; position: static; }
+  .sat-descriptor-browser-header { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .sat-descriptor-browser-summary { align-items: flex-start; }
+}
+
+.sat-descriptor-review {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: calc(100vh - 56px);
+  min-height: 620px;
+  width: 100%;
+  background: #111416;
+  color: #f1f3f4;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.sat-descriptor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 8px 14px;
+  border-bottom: 1px solid #3a4247;
+  background: #1b2023;
+}
+
+.sat-descriptor-heading { display: flex; align-items: baseline; gap: 14px; }
+.sat-descriptor-heading strong { font-size: 17px; }
+.sat-descriptor-progress { color: #aeb8bd; font-size: 13px; }
+
+.sat-descriptor-icon {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #586269;
+  border-radius: 50%;
+  background: #272e32;
+  color: #fff;
+  font-size: 18px;
+}
+
+.sat-descriptor-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(340px, 0.8fr);
+}
+
+.sat-descriptor-player-pane {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 12px;
+  background: #080a0b;
+}
+
+.sat-descriptor-player-host {
+  flex: 0 0 clamp(370px, 54vh, 680px);
+  min-height: 370px;
+  overflow: hidden;
+  position: relative;
+}
+
+.sat-descriptor-player-host > .VideoPlayer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.sat-descriptor-player-host .video-wrapper {
+  flex: 1 1 auto;
+  min-height: 260px;
+}
+
+.sat-descriptor-seek-feedback {
+  animation: sat-descriptor-seek-feedback 850ms ease-out forwards;
+  background: rgba(8, 12, 14, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  left: 50%;
+  line-height: 1;
+  min-width: 86px;
+  padding: 10px 14px;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+  top: 42%;
+  transform: translate(-50%, -50%);
+  z-index: 30;
+}
+
+@keyframes sat-descriptor-seek-feedback {
+  0% { opacity: 0; transform: translate(-50%, -44%); }
+  12%, 68% { opacity: 1; transform: translate(-50%, -50%); }
+  100% { opacity: 0; transform: translate(-50%, -56%); }
+}
+
+.sat-descriptor-player-loading {
+  align-items: center;
+  background: #000;
+  color: #9aa7ad;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+}
+
+.sat-descriptor-player-fallback {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  height: 100%;
+}
+
+.sat-descriptor-player-fallback small {
+  background: #2c2414;
+  color: #edcf7c;
+  padding: 5px 8px;
+}
+
+.sat-descriptor-video {
+  width: 100%;
+  height: 100%;
+  min-height: 260px;
+  object-fit: contain;
+  background: #000;
+}
+
+.sat-descriptor-storyboard {
+  border-bottom: 1px solid #2e373b;
+  padding: 10px 0 9px;
+}
+
+.sat-descriptor-storyboard-heading {
+  align-items: baseline;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+.sat-descriptor-storyboard-heading strong { font-size: 13px; }
+.sat-descriptor-storyboard-heading span,
+.sat-descriptor-storyboard-status { color: #8f9ba1; font-size: 11px; }
+
+.sat-descriptor-storyboard-grid {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.sat-descriptor-storyboard-frame {
+  background: #151a1d;
+  border: 1px solid #48545a;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+}
+
+.sat-descriptor-storyboard-frame:hover,
+.sat-descriptor-storyboard-frame:focus-visible {
+  border-color: #65cdb8;
+  outline: 2px solid rgba(101, 205, 184, 0.24);
+}
+
+.sat-descriptor-storyboard-image {
+  background-color: #0b0d0e;
+  background-repeat: no-repeat;
+  display: block;
+  opacity: 0;
+  width: 100%;
+}
+
+.sat-descriptor-storyboard-frame.is-ready .sat-descriptor-storyboard-image { opacity: 1; }
+
+.sat-descriptor-storyboard-time {
+  background: rgba(0, 0, 0, 0.78);
+  bottom: 3px;
+  font-size: 10px;
+  line-height: 1;
+  padding: 3px 4px;
+  position: absolute;
+  right: 3px;
+}
+
+.sat-descriptor-scene-title {
+  display: block;
+  padding-top: 10px;
+  color: #edf2f4;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sat-descriptor-scene-title:hover,
+.sat-descriptor-scene-title:focus-visible {
+  color: #65cdb8;
+  text-decoration: underline;
+}
+
+.sat-descriptor-route-error {
+  background: #431f22;
+  border-bottom: 1px solid #7f343a;
+  color: #ffb2b2;
+  padding: 8px 14px;
+}
+
+.sat-descriptor-complete {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: center;
+}
+
+.sat-descriptor-complete span { color: #aeb8bd; }
+
+.sat-descriptor-scene-path {
+  overflow: hidden;
+  padding-top: 3px;
+  color: #8f9ba1;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sat-descriptor-controls {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  border-left: 1px solid #3a4247;
+  background: #181d20;
+}
+
+.sat-descriptor-detected {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-left: 3px solid #e2b84d;
+  background: #29271d;
+  color: #f1d98c;
+  font-size: 12px;
+}
+
+.sat-descriptor-section { margin-bottom: 18px; }
+.sat-descriptor-section h3 { margin: 0 0 8px; font-size: 14px; }
+
+.sat-descriptor-search {
+  width: 100%;
+  height: 34px;
+  margin-bottom: 8px;
+  border: 1px solid #556168;
+  border-radius: 5px;
+  background: #0f1315;
+  color: #fff;
+  padding: 5px 8px;
+}
+
+.sat-descriptor-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.sat-descriptor-chip {
+  border: 1px solid #58656c;
+  border-radius: 6px;
+  background: #262d31;
+  color: #e7ecee;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.sat-descriptor-chip[aria-pressed="true"] {
+  border-color: #62c8b4;
+  background: #1f5a50;
+  color: #fff;
+}
+
+.sat-descriptor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.sat-descriptor-action {
+  min-height: 34px;
+  border: 1px solid #59666d;
+  border-radius: 5px;
+  padding: 6px 10px;
+  color: #fff;
+}
+
+.sat-descriptor-action.secondary { background: #2a3236; }
+.sat-descriptor-action.primary { border-color: #65cdb8; background: #216b5e; font-weight: 600; }
+.sat-descriptor-action:disabled { opacity: 0.45; }
+
+.sat-descriptor-keybind-panel {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #3a4247;
+}
+
+.sat-descriptor-keybind-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.sat-descriptor-keybind-header h3 {
+  margin: 0;
+  color: #edf2f4;
+  font-size: 14px;
+}
+
+.sat-descriptor-keybind-reset,
+.sat-descriptor-keybind-value {
+  border: 1px solid #59666d;
+  border-radius: 5px;
+  background: #252d31;
+  color: #e7ecee;
+}
+
+.sat-descriptor-keybind-reset {
+  padding: 4px 7px;
+  font-size: 11px;
+}
+
+.sat-descriptor-keybind-group { margin-top: 11px; }
+
+.sat-descriptor-keybind-category {
+  margin-bottom: 4px;
+  color: #8f9ba1;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sat-descriptor-keybind-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(92px, auto);
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  border-bottom: 1px solid #2c3438;
+  color: #cbd4d8;
+  font-size: 12px;
+}
+
+.sat-descriptor-keybind-value {
+  min-width: 92px;
+  padding: 4px 7px;
+  overflow: hidden;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sat-descriptor-keybind-value:hover,
+.sat-descriptor-keybind-value:focus-visible,
+.sat-descriptor-keybind-reset:hover,
+.sat-descriptor-keybind-reset:focus-visible {
+  border-color: #65cdb8;
+  background: #303a3f;
+}
+
+.sat-descriptor-keybind-row.is-recording .sat-descriptor-keybind-value {
+  border-color: #e2b84d;
+  background: #4a3d19;
+  color: #fff0ba;
+}
+
+.sat-descriptor-keybind-native {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: #aab5ba;
+  font-size: 12px;
+}
+
+.sat-descriptor-keybind-native kbd {
+  border: 1px solid #465159;
+  border-radius: 4px;
+  background: #111619;
+  padding: 3px 8px;
+  color: #dce4e7;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+}
+
+.sat-descriptor-keybind-native small {
+  grid-column: 1 / -1;
+  color: #7f8b91;
+  font-size: 10px;
+}
+
+.sat-descriptor-keybind-help {
+  margin: 10px 0 0;
+  color: #8f9ba1;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.sat-descriptor-status,
+.sat-descriptor-loading {
+  min-height: 32px;
+  padding: 7px 14px;
+  border-top: 1px solid #3a4247;
+  background: #1b2023;
+  color: #b7c2c7;
+  font-size: 12px;
+}
+
+.sat-descriptor-loading { display: grid; place-items: center; min-height: 100%; font-size: 16px; }
+.sat-descriptor-error { color: #ff9b9b; }
+
+@media (max-width: 900px) {
+  .sat-descriptor-body { grid-template-columns: 1fr; grid-template-rows: minmax(260px, 48vh) minmax(0, 1fr); }
+  .sat-descriptor-controls { border-left: 0; border-top: 1px solid #3a4247; }
+  .sat-descriptor-launch { right: 10px; bottom: 66px; }
+  .sat-descriptor-player-host { flex-basis: 390px; }
+  .sat-descriptor-storyboard-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
