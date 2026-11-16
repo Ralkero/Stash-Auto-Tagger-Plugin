@@ -239,6 +239,79 @@ test("apply: existing groups and tags are preserved during updates", async () =>
   assert.deepStrictEqual(update.variables.input.tag_ids.sort(), ["t-ashley", "t-existing", "t-leon"]);
 });
 
+test("apply: weaker candidates in an apply-level field are not applied", async () => {
+  const runtime = makeRuntime({
+    scene: sceneFixture({ path: "E:\\Rule34\\Overwatch\\AxenAnim - Tracer x Widowmaker.mp4" }),
+    studios: { "Overwatch": { id: "s-ow", name: "Overwatch" } },
+    groups: { "AxenAnim": { id: "g-axen", name: "AxenAnim" } },
+    tags: {
+      "Tracer": { id: "t-tracer", name: "Tracer", parents: [] },
+      "Characters": { id: "t-parent", name: "Characters", parents: [] }
+    }
+  });
+  const aliases = plugin.normalizeAliasMap({
+    studios: { overwatch: "Overwatch" },
+    groups: { axenanim: "AxenAnim" },
+    characters: { tracer: "Tracer" }
+  });
+
+  // Tracer is an exact alias (0.99); Widowmaker is only a title fallback (0.93).
+  // The character field passes 0.94 because of Tracer, but Widowmaker must not ride along.
+  const row = await plugin.processScene(
+    "scene1",
+    "bulk",
+    { dryRun: false, confidenceThreshold: 0.94, allowTitleFallbackCharacterTags: true },
+    aliases,
+    runtime,
+    "test",
+    ""
+  );
+
+  assert.strictEqual(row.result, "updated");
+  assert.ok(row.detected_characters.split("|").includes("Widowmaker"), "fixture should detect the fallback candidate");
+  assert.ok(!runtime.calls.some(c => c.type === "CreateTag" && c.variables.input.name === "Widowmaker"));
+  const update = runtime.calls.find(c => c.type === "UpdateScene");
+  assert.deepStrictEqual(update.variables.input.tag_ids, ["t-tracer"]);
+});
+
+test("aliases: Group aliases are sent as a string, Studio/Tag aliases as a list", () => {
+  const sent = [];
+  const runtime = { gql: { Do: (query, variables) => { sent.push({ query, variables }); return {}; } } };
+
+  plugin.updateAliasesForObject(
+    { objectType: "group", objectId: "g1", objectName: "NoduSFM", object: { id: "g1", name: "NoduSFM", aliases: "Nodu SFM" }, aliases: ["Nodu"] },
+    runtime
+  );
+  plugin.updateAliasesForObject(
+    { objectType: "group", objectId: "g2", objectName: "AxenAnim", object: { id: "g2", name: "AxenAnim", aliases: "" }, aliases: ["Axen"] },
+    runtime
+  );
+  plugin.updateAliasesForObject(
+    { objectType: "tag", objectId: "t1", objectName: "Tracer", object: { id: "t1", name: "Tracer", aliases: ["Lena Oxton"] }, aliases: ["Lena"] },
+    runtime
+  );
+
+  assert.strictEqual(sent[0].variables.input.aliases, "Nodu SFM, Nodu");
+  assert.strictEqual(sent[1].variables.input.aliases, "Axen");
+  assert.deepStrictEqual(sent[2].variables.input.aliases, ["Lena Oxton", "Lena"]);
+});
+
+test("repair: a group lesson never removes an unrelated predicted Group", () => {
+  const scene = {
+    id: "s1",
+    groups: [{ group: { id: "g-redmoa", name: "Redmoa" } }],
+    tags: [],
+    files: [{ path: "E:\\Rule34\\Misc\\Redmoa - Nodu cameo.mp4" }]
+  };
+  const rule = { id: "r1", type: "group_alias", signal: "Nodu" };
+  const checked = { valid: true, target: { id: "g-nodu", name: "NoduSFM" } };
+  const baselineRaw = { studios: [], groups: [{ name: "Redmoa", aliasText: "Redmoa" }], characters: [] };
+
+  const change = plugin.repairChangeForRule(scene, rule, checked, baselineRaw);
+  assert.deepStrictEqual(change.removeIds, [], "Redmoa was not predicted from the 'Nodu' token");
+  assert.deepStrictEqual(change.addIds, ["g-nodu"]);
+});
+
 test("studio guard: existing studio is not replaced unless overwrite is true", async () => {
   const baseScene = {
     path: "C:\\Users\\jmswo\\Downloads\\HydraFXX\\Animations\\HydraFXX - D.Va [1080P].mp4",

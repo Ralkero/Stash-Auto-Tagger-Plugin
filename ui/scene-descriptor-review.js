@@ -36,8 +36,28 @@
     { id: "review_skip", category: "Review", label: "Skip Scene", defaultBinding: "Alt+N" },
     { id: "review_save", category: "Review", label: "Save & Next", defaultBinding: "Ctrl+Enter" },
     { id: "review_not_applicable", category: "Review", label: "Not Applicable", defaultBinding: "Ctrl+Shift+N" },
-    { id: "review_undo", category: "Review", label: "Undo Last Save", defaultBinding: "Ctrl+Z" }
+    { id: "review_undo", category: "Review", label: "Undo Last Save", defaultBinding: "Alt+U" }
   ];
+  // Former default for review_undo. Ctrl+Z is the browser's text undo, so it is
+  // migrated away from stored bindings and never honoured inside text fields.
+  var LEGACY_UNDO_BINDING = "Ctrl+Z";
+  var TYPING_SAFE_ACTIONS = {
+    review_previous: true,
+    review_skip: true,
+    review_save: true,
+    review_not_applicable: true,
+    seek_step_increase: true,
+    seek_step_decrease: true
+  };
+
+  function isEditableTarget(target) {
+    return Boolean(target && (/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) || target.isContentEditable));
+  }
+
+  function allowedWhileTyping(actionId, event) {
+    if (!actionId || !TYPING_SAFE_ACTIONS[actionId]) return false;
+    return Boolean(event && (event.ctrlKey || event.altKey || event.metaKey));
+  }
   var baseURL = (document.querySelector("base") && document.querySelector("base").getAttribute("href")) || "/";
 
   var ACT_ALIASES = {
@@ -243,6 +263,13 @@
           bindings[action.id] = stored[action.id];
         }
       });
+      if (bindings.review_undo === LEGACY_UNDO_BINDING) {
+        var replacement = keybindAction("review_undo").defaultBinding;
+        var taken = KEYBIND_ACTIONS.some(function (action) {
+          return action.id !== "review_undo" && bindings[action.id] === replacement;
+        });
+        bindings.review_undo = taken ? "" : replacement;
+      }
     } catch (ignore) {}
     return bindings;
   }
@@ -1122,6 +1149,10 @@
           }
 
           var actionId = actionForEvent(event, keybinds);
+          var editable = isEditableTarget(event.target);
+          // While typing, only modifier-bound review actions may run; plain
+          // keys, digits, and text-editing combos (Ctrl+Z, Ctrl+Arrow) stay with the field.
+          if (editable && !allowedWhileTyping(actionId, event)) return;
           var player = document.querySelector(".sat-descriptor-player-host .VideoPlayer");
           var handled = false;
           if (actionId === "seek_step_increase" || actionId === "seek_step_decrease") {
@@ -1151,7 +1182,6 @@
             handled = applyReviewPlayerShortcut(event, player, { seekStep: preciseSeekStep, onFeedback: showSeekFeedback });
           }
           if (!handled) return;
-          var editable = event.target && (/INPUT|TEXTAREA|SELECT/.test(event.target.tagName) || event.target.isContentEditable);
           var reviewAction = actionId && actionId.indexOf("review_") === 0;
           if (!editable || event.ctrlKey || event.altKey || event.metaKey || reviewAction) {
             event.preventDefault();
@@ -1338,6 +1368,9 @@
     actionForEvent: actionForEvent,
     assignKeybind: assignKeybind,
     defaultKeybinds: defaultKeybinds,
+    loadKeybinds: loadKeybinds,
+    isEditableTarget: isEditableTarget,
+    allowedWhileTyping: allowedWhileTyping,
     keybindActions: KEYBIND_ACTIONS.slice(),
     vocabularyFromScenes: descriptorVocabularyFromScenes,
     fields: { acts: FIELD_ACTS, endings: FIELD_ENDINGS, status: FIELD_STATUS }
