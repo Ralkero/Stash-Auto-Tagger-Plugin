@@ -120,7 +120,31 @@ assert.strictEqual(api.eventToBinding({ key: "p", altKey: true }), "Alt+P");
 assert.strictEqual(api.eventToBinding({ key: "Control", ctrlKey: true }), "");
 const defaults = JSON.parse(JSON.stringify(api.defaultKeybinds()));
 assert.strictEqual(defaults.review_save, "Ctrl+Enter");
-assert.strictEqual(defaults.review_undo, "Ctrl+Z");
+assert.strictEqual(defaults.review_undo, "Alt+U", "undo must not default to the browser's text-undo shortcut");
+
+// Typing in a descriptor field must not trigger playback, seeking or undo.
+const inputTarget = { tagName: "INPUT" };
+assert.strictEqual(api.isEditableTarget(inputTarget), true);
+assert.strictEqual(api.isEditableTarget({ tagName: "DIV", isContentEditable: false }), false);
+assert.strictEqual(api.allowedWhileTyping("fullscreen", { key: "f" }), false, "plain letters stay with the text field");
+assert.strictEqual(api.allowedWhileTyping("seek_back", { key: "a" }), false);
+assert.strictEqual(api.allowedWhileTyping(null, { key: "6" }), false, "digits must not percentage-seek while typing");
+assert.strictEqual(api.allowedWhileTyping("review_undo", { key: "z", ctrlKey: true }), false, "undo must never fire from a text field");
+assert.strictEqual(api.allowedWhileTyping("seek_back_minute", { key: "ArrowLeft", ctrlKey: true }), false, "Ctrl+Arrow is word navigation in text");
+assert.strictEqual(api.allowedWhileTyping("review_save", { key: "Enter", ctrlKey: true }), true, "Ctrl+Enter still saves from the search box");
+assert.strictEqual(api.allowedWhileTyping("review_save", { key: "s" }), false, "a rebinding to a plain key must not fire while typing");
+
+// A stored legacy Ctrl+Z undo binding migrates to the new default.
+const originalGetItem = context.localStorage.getItem;
+context.localStorage.getItem = key => (key === "scene-auto-tagger:descriptor-keybinds:v1"
+  ? JSON.stringify({ ...defaults, review_undo: "Ctrl+Z" })
+  : null);
+assert.strictEqual(api.loadKeybinds().review_undo, "Alt+U");
+context.localStorage.getItem = key => (key === "scene-auto-tagger:descriptor-keybinds:v1"
+  ? JSON.stringify({ ...defaults, review_undo: "Ctrl+Z", review_skip: "Alt+U" })
+  : null);
+assert.strictEqual(api.loadKeybinds().review_undo, "", "migration must not create a duplicate binding");
+context.localStorage.getItem = originalGetItem;
 assert.strictEqual(api.keybindActions.length, 21);
 assert.strictEqual(api.actionForEvent({ key: "k", ctrlKey: true }, { seek_forward: "Ctrl+K" }), "seek_forward");
 const reassigned = JSON.parse(JSON.stringify(api.assignKeybind(defaults, "seek_back", "D")));

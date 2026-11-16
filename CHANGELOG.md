@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.3 - 2026-11-15
+
+- Fixed auto-learned Group aliases: Stash stores Group aliases as one string, so they are now appended to that string instead of sent as a list (which always failed).
+- Fixed Undo in Learned Corrections re-targeting an already undone lesson; repeated undos now step back through history.
+- Repairs are now recorded in learned-correction history with each scene's before/after state and can be undone. Scenes edited after the repair are skipped.
+- A Group repair now only removes a Group predicted from the lesson's exact filename token, never an unrelated first prediction.
+- Only candidates that individually pass the confidence threshold are applied; a strong match no longer carries weaker candidates in the same field.
+- Descriptor Review shortcuts no longer fire while typing in a descriptor field. Undo Last Save now defaults to `Alt+U` (stored `Ctrl+Z` bindings migrate automatically).
+- Descriptor card badges no longer trigger an endless refresh loop on the Scenes page.
+
 ## 0.6.2 - 2026-07-20
 
 - Linked the scene title beneath Descriptor Review's frame overview directly to the scene's normal Stash playback page.

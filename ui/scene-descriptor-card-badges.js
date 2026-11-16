@@ -212,8 +212,9 @@
       if (existing) existing.remove();
       return;
     }
-    var row = metadataRow(card);
-    if (!row) return;
+    // metadataRow scans the whole card; only needed when placing a new badge.
+    var row = existing ? null : metadataRow(card);
+    if (!existing && !row) return;
     var label = tooltip(summary);
     var badge = existing || document.createElement("button");
     badge.className = BADGE_CLASS;
@@ -236,7 +237,23 @@
       });
       row.appendChild(badge);
     }
-    badge.querySelector(".sat-descriptor-card-count").textContent = String(summary.count);
+    // Writing textContent replaces the text node even when unchanged, which the
+    // body MutationObserver sees as a change and would schedule another refresh.
+    var countNode = badge.querySelector(".sat-descriptor-card-count");
+    var countText = String(summary.count);
+    if (countNode && countNode.textContent !== countText) countNode.textContent = countText;
+  }
+
+  function isOwnMutation(record) {
+    var node = record && record.target;
+    if (node && node.nodeType !== 1) node = node.parentNode;
+    if (!node || typeof node.closest !== "function") return false;
+    if (node.closest("." + BADGE_CLASS)) return true;
+    if (activePopover && activePopover.contains(node)) return true;
+    var changed = Array.prototype.slice.call(record.addedNodes || []).concat(Array.prototype.slice.call(record.removedNodes || []));
+    return changed.length > 0 && changed.every(function (child) {
+      return child.nodeType === 1 && (child.classList.contains(BADGE_CLASS) || child === activePopover);
+    });
   }
 
   function visibleCards() {
@@ -317,7 +334,12 @@
     if (window.PluginApi && PluginApi.Event && PluginApi.Event.addEventListener) {
       PluginApi.Event.addEventListener("stash:location", function () { closePopover(); scheduleRefresh(100); });
     }
-    new MutationObserver(function () { scheduleRefresh(120); }).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(function (records) {
+      // Ignore changes this plugin made itself (badges, popover) so a refresh
+      // cannot re-trigger the next one.
+      if (records.every(isOwnMutation)) return;
+      scheduleRefresh(120);
+    }).observe(document.body, { childList: true, subtree: true });
   }
 
   window.SceneDescriptorCardBadges = {

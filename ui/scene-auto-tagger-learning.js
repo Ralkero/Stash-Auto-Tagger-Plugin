@@ -379,11 +379,26 @@
       shell.body.appendChild(list);
       var actions = el("div", "sat-modal-actions");
       actions.appendChild(button("Close", "sat-button-secondary", closeModal));
-      var lastLearn = (result.history || []).slice().reverse().filter(function (event) { return event.action === "learn"; })[0];
-      if (lastLearn) {
-        actions.appendChild(button("Undo last lesson", "sat-button-secondary", function (event) {
+      // Latest lesson or repair that has not already been undone, so repeated
+      // clicks walk back through history.
+      var history = result.history || [];
+      var undoneIds = {};
+      history.forEach(function (event) { if (event && event.action === "undo" && event.undoneEventId) undoneIds[event.undoneEventId] = true; });
+      var lastUndoable = history.slice().reverse().filter(function (event) {
+        return event && (event.action === "learn" || event.action === "repair") && !undoneIds[event.id];
+      })[0];
+      if (lastUndoable) {
+        var undoLabel = lastUndoable.action === "repair"
+          ? "Undo last repair (" + ((lastUndoable.scenes || []).length) + " scenes)"
+          : "Undo last lesson";
+        actions.appendChild(button(undoLabel, "sat-button-secondary", function (event) {
           event.currentTarget.disabled = true;
-          runOperation("learn_undo", { eventId: lastLearn.id, expectedRevision: result.revision }).then(refresh).catch(function (error) { showError(shell, error); });
+          runOperation("learn_undo", { eventId: lastUndoable.id, expectedRevision: result.revision }).then(function (undone) {
+            if (undone && undone.undoneAction === "repair" && undone.skipped) {
+              window.alert("Restored " + (undone.restored || 0) + " scenes. Skipped " + undone.skipped + " that were edited after the repair.");
+            }
+            refresh();
+          }).catch(function (error) { showError(shell, error); });
         }));
       }
       shell.body.appendChild(actions);

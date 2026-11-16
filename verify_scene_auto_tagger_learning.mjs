@@ -172,12 +172,47 @@ assert.throws(
   "a stale correction manager must not overwrite a newer revision"
 );
 
-const undone = api.undoLearnedCorrection({
-  eventId: saved.event.id,
-  expectedRevision: saved.revision
-}, runtime);
-assert.strictEqual(undone.revision, 2);
+// Applying a repair records an undoable history event with before/after state.
+assert.strictEqual(repairResult.revision, 2, "repairs are recorded in learned-correction history");
+const repairEvent = JSON.parse(pluginConfig.learnedCorrectionsV1).history.slice(-1)[0];
+assert.strictEqual(repairEvent.action, "repair");
+assert.strictEqual(repairEvent.scenes[0].before.studioId, "84");
+assert.strictEqual(repairEvent.scenes[0].after.studioId, "62");
+const configAfterRepair = clone(pluginConfig);
+
+// A scene edited after the repair is left alone by undo.
+wrongScene.tags.push({ id: "555", name: "Manual Edit", aliases: [], ignore_auto_tag: false, parents: [] });
+const updatesBeforeSkippedUndo = mutations.filter(item => item.type === "sceneUpdate").length;
+const skippedUndo = api.undoLearnedCorrection({ expectedRevision: 2 }, runtime);
+assert.strictEqual(skippedUndo.undoneAction, "repair");
+assert.strictEqual(skippedUndo.restored, 0);
+assert.strictEqual(skippedUndo.skipped, 1);
+assert.strictEqual(mutations.filter(item => item.type === "sceneUpdate").length, updatesBeforeSkippedUndo, "an edited scene must not be overwritten");
+wrongScene.tags.pop();
+pluginConfig = clone(configAfterRepair);
+
+// Undo walks back through history: repair first, then the lesson.
+const undoneRepair = api.undoLearnedCorrection({ expectedRevision: 2 }, runtime);
+assert.strictEqual(undoneRepair.undoneAction, "repair");
+assert.strictEqual(undoneRepair.restored, 1);
+assert.strictEqual(undoneRepair.revision, 3);
+assert.strictEqual(mutations.filter(item => item.type === "sceneUpdate").slice(-1)[0].variables.input.studio_id, "84", "undo restores the original Studio");
+
+const undone = api.undoLearnedCorrection({ expectedRevision: 3 }, runtime);
+assert.strictEqual(undone.undoneAction, "learn");
+assert.strictEqual(undone.undoneEventId, saved.event.id);
+assert.strictEqual(undone.revision, 4);
 assert.strictEqual(JSON.parse(pluginConfig.learnedCorrectionsV1).rules[0].status, "disabled");
+
+assert.throws(
+  () => api.undoLearnedCorrection({ expectedRevision: 4 }, runtime),
+  /no lesson or repair/i,
+  "a second undo must not re-target an already undone event"
+);
+assert.throws(
+  () => api.undoLearnedCorrection({ eventId: saved.event.id, expectedRevision: 4 }, runtime),
+  /already been undone/i
+);
 
 pluginConfig = clone(savedConfig);
 const disabled = api.disableLearnedCorrection({

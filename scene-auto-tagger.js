@@ -13,7 +13,7 @@
  * - If the runtime exposes log/progress helpers, the plugin also attempts to use them.
  */
 
-const PLUGIN_VERSION = "0.6.2";
+const PLUGIN_VERSION = "0.6.3";
 const PLUGIN_ID = "scene-auto-tagger";
 const LEGACY_PLUGIN_ID = "plugin";
 const LEARNED_CORRECTIONS_KEY = "learnedCorrectionsV1";
@@ -2391,11 +2391,13 @@ function processScene(sceneId, mode, configInput, aliasMapInput, runtime, runId,
       return handleReviewScene(sceneId, config, current, runtime, csvRow);
     }
 
+    // A field passing the threshold only means its best candidate passed.
+    // Filter per candidate so weaker matches in the same field are not applied.
     const matched = resolveApplyMatches(
       {
         studio: decision.studio.decision === "apply" ? studioCandidate : null,
-        groups: decision.group.decision === "apply" ? groupCandidates : [],
-        characters: decision.character.decision === "apply" ? characterCandidates : []
+        groups: decision.group.decision === "apply" ? applyLevelCandidates(groupCandidates, config.confidenceThreshold) : [],
+        characters: decision.character.decision === "apply" ? applyLevelCandidates(characterCandidates, config.confidenceThreshold) : []
       },
       config,
       runtime,
@@ -2962,6 +2964,14 @@ function dedupeAutoAliasPlans(plans) {
   return Object.keys(byObject).map(k => byObject[k]).filter(p => p.aliases.length);
 }
 
+// Studio and Tag aliases are [String!] in Stash, but Group.aliases is a single
+// free-text String. Sending a list for a Group fails GraphQL input coercion.
+function aliasUpdateValue(objectType, object, existingAliases, additions) {
+  if (objectType !== "group") return existingAliases.concat(additions);
+  const raw = object && typeof object.aliases === "string" ? object.aliases.trim() : existingAliases.join(", ");
+  return raw ? raw + ", " + additions.join(", ") : additions.join(", ");
+}
+
 function updateAliasesForObject(plan, runtime) {
   const existingAliases = aliasValuesForObject(plan.object);
   const existingNorms = {};
@@ -2980,7 +2990,7 @@ function updateAliasesForObject(plan, runtime) {
 
   const input = {
     id: plan.objectId,
-    aliases: existingAliases.concat(additions)
+    aliases: aliasUpdateValue(plan.objectType, plan.object, existingAliases, additions)
   };
 
   if (plan.objectType === "studio") {
@@ -4190,35 +4200,147 @@ function undoLearnedCorrection(args, runtime) {
   const expectedRevision = Number(args.expectedRevision);
   if (state.store.revision !== expectedRevision) throw new Error("Learned corrections changed. Refresh and try again.");
   const eventId = String(args.eventId || "");
+  const undone = undoneEventIds(state.store.history);
   let event = null;
-  for (let i = state.store.history.length - 1; i >= 0; i--) {
-    const candidate = state.store.history[i];
-    if (candidate.action === "learn" && (!eventId || candidate.id === eventId)) {
-      event = candidate;
-      break;
-    }
+  if (eventId) {
+    event = state.store.history.find(candidate => candidate && candidate.id === eventId && UNDOABLE_ACTIONS[candidate.action]) || null;
+    if (event && undone[event.id]) throw new Error("That change has already been undone");
+  } else {
+    event = latestUndoableEvent(state.store.history);
   }
-  if (!event) throw new Error("No learning event is available to undo");
+  if (!event) throw new Error("No lesson or repair is available to undo");
   const now = new Date().toISOString();
-  for (const rule of state.store.rules) {
-    if ((event.createdRuleIds || []).includes(rule.id) && rule.status === "active") {
-      rule.status = "disabled";
-      rule.updatedAt = now;
-    }
-    if ((event.supersededRuleIds || []).includes(rule.id) && rule.status === "superseded") {
-      rule.status = "active";
-      rule.updatedAt = now;
+  const undoEvent = {
+    id: newLearnedEventId(), action: "undo", undoneEventId: event.id,
+    undoneAction: event.action, timestamp: now
+  };
+
+  if (event.action === "repair") {
+    const restored = restoreRepairEvent(event, runtime);
+    undoEvent.restored = restored.restored;
+    undoEvent.skipped = restored.skipped;
+    undoEvent.results = restored.results;
+  } else {
+    for (const rule of state.store.rules) {
+      if ((event.createdRuleIds || []).includes(rule.id) && rule.status === "active") {
+        rule.status = "disabled";
+        rule.updatedAt = now;
+      }
+      if ((event.supersededRuleIds || []).includes(rule.id) && rule.status === "superseded") {
+        rule.status = "active";
+        rule.updatedAt = now;
+      }
     }
   }
+
   state.store.revision++;
-  state.store.history.push({
-    id: "le-" + Date.now(), action: "undo", undoneEventId: event.id,
-    timestamp: now, revision: state.store.revision
-  });
+  undoEvent.revision = state.store.revision;
+  state.store.history.push(undoEvent);
   state.store.history = state.store.history.slice(-LEARNED_HISTORY_LIMIT);
   saveLearnedPluginState(state, state.store, runtime);
-  pluginLog("LEARN_UNDO event=" + event.id + " revision=" + state.store.revision, runtime);
-  return { ok: true, revision: state.store.revision, undoneEventId: event.id };
+  pluginLog(
+    "LEARN_UNDO event=" + event.id +
+    " action=" + event.action +
+    (event.action === "repair" ? " restored=" + undoEvent.restored + " skipped=" + undoEvent.skipped : "") +
+    " revision=" + state.store.revision,
+    runtime
+  );
+  return {
+    ok: true,
+    revision: state.store.revision,
+    undoneEventId: event.id,
+    undoneAction: event.action,
+    restored: undoEvent.restored,
+    skipped: undoEvent.skipped
+  };
+}
+
+const UNDOABLE_ACTIONS = { learn: true, repair: true };
+
+function newLearnedEventId() {
+  return "le-" + Date.now() + "-" + Math.floor(Math.random() * 1000000);
+}
+
+function undoneEventIds(history) {
+  const ids = {};
+  for (const event of history || []) {
+    if (event && event.action === "undo" && event.undoneEventId) ids[String(event.undoneEventId)] = true;
+  }
+  return ids;
+}
+
+// Most recent lesson or repair that has not been undone yet, so repeated
+// undos walk back through history instead of re-targeting the same event.
+function latestUndoableEvent(history) {
+  const undone = undoneEventIds(history);
+  for (let i = (history || []).length - 1; i >= 0; i--) {
+    const event = history[i];
+    if (event && UNDOABLE_ACTIONS[event.action] && !undone[String(event.id)]) return event;
+  }
+  return null;
+}
+
+function sceneMetadataState(scene) {
+  return {
+    studioId: (scene && scene.studio && String(scene.studio.id)) || null,
+    groupIds: uniq(((scene && scene.groups) || []).map(item => String(item && item.group && item.group.id || "")).filter(Boolean)).sort(),
+    tagIds: uniq(((scene && scene.tags) || []).map(tag => String(tag && tag.id || "")).filter(Boolean)).sort()
+  };
+}
+
+function sameSceneMetadataState(a, b) {
+  return JSON.stringify(a || {}) === JSON.stringify(b || {});
+}
+
+function currentFromMetadataState(state) {
+  return {
+    currentStudioId: state.studioId || null,
+    currentGroupIds: new Set(state.groupIds || []),
+    currentTagIds: new Set(state.tagIds || [])
+  };
+}
+
+// Restore each repaired scene to its recorded "before" state, but only when it
+// still matches the recorded "after" state; scenes edited since are left alone.
+function restoreRepairEvent(event, runtime) {
+  let restored = 0;
+  let skipped = 0;
+  const results = [];
+  for (const entry of event.scenes || []) {
+    const data = doGraphQL(GET_SCENE, { id: entry.sceneId }, runtime, "RecheckSceneForRepairUndo");
+    const scene = data && data.findScene;
+    if (!scene) {
+      skipped++;
+      results.push({ sceneId: entry.sceneId, status: "skipped_missing" });
+      continue;
+    }
+    const currentState = sceneMetadataState(scene);
+    if (!sameSceneMetadataState(currentState, entry.after)) {
+      skipped++;
+      results.push({ sceneId: entry.sceneId, status: "skipped_changed" });
+      continue;
+    }
+    const before = entry.before || {};
+    const finalAssignments = {
+      studioId: before.studioId || null,
+      groupIds: before.groupIds || [],
+      tagIds: before.tagIds || []
+    };
+    const current = currentFromMetadataState(currentState);
+    if (compareBeforeWrite(finalAssignments, current)) {
+      skipped++;
+      results.push({ sceneId: entry.sceneId, status: "no_change" });
+      continue;
+    }
+    const input = buildUpdateInput(entry.sceneId, finalAssignments, current);
+    // buildUpdateInput drops a cleared Studio; restoring "no Studio" needs an explicit null.
+    if (!finalAssignments.studioId && current.currentStudioId) input.studio_id = null;
+    doGraphQL(UPDATE_SCENE, { input }, runtime, "UndoLearnedRepair");
+    restored++;
+    results.push({ sceneId: entry.sceneId, status: "restored" });
+    pluginLog("LEARN_REPAIR_UNDONE scene=" + entry.sceneId + " event=" + event.id, runtime);
+  }
+  return { restored, skipped, results };
 }
 
 function repairSearchTerms(rules, objects) {
@@ -4276,7 +4398,9 @@ function repairChangeForRule(scene, rule, checked, baselineRaw) {
   }
 
   if (rule.type === "group_alias") {
-    const candidate = (baselineRaw.groups || []).find(item => normalize(item.aliasText || "") === normalize(rule.signal)) || baselineRaw.groups[0];
+    // Only remove a Group that was predicted from this exact filename token.
+    // Never fall back to an unrelated predicted Group.
+    const candidate = (baselineRaw.groups || []).find(item => normalize(item.aliasText || "") === normalize(rule.signal));
     const currentItems = (scene.groups || []).map(item => item && item.group).filter(Boolean);
     if (currentItems.some(item => String(item.id) === String(checked.target.id))) return null;
     const wrong = candidate ? currentItems.filter(item => normalize(item.name) === normalize(candidate.name)) : [];
@@ -4359,6 +4483,7 @@ function applyLearnedRepairs(args, runtime) {
   let updated = 0;
   let skipped = 0;
   const results = [];
+  const undoEntries = [];
 
   for (const row of fresh.rows) {
     if (!approved[row.sceneId]) continue;
@@ -4388,12 +4513,43 @@ function applyLearnedRepairs(args, runtime) {
       results.push({ sceneId: row.sceneId, status: "no_change" });
       continue;
     }
-    doGraphQL(UPDATE_SCENE, { input: buildUpdateInput(row.sceneId, finalAssignments, current) }, runtime, "ApplyLearnedRepair");
+    const before = sceneMetadataState(scene);
+    const updatedData = doGraphQL(UPDATE_SCENE, { input: buildUpdateInput(row.sceneId, finalAssignments, current) }, runtime, "ApplyLearnedRepair");
+    const updatedScene = updatedData && updatedData.sceneUpdate;
+    // Prefer the state Stash reports back; fall back to what was requested.
+    const after = updatedScene && updatedScene.studio !== undefined && updatedScene.tags && updatedScene.groups
+      ? sceneMetadataState(updatedScene)
+      : { studioId: studioId || null, groupIds: uniq(groupIds).sort(), tagIds: uniq(tagIds).sort() };
+    undoEntries.push({ sceneId: row.sceneId, before, after });
     updated++;
     results.push({ sceneId: row.sceneId, status: "updated", changes: row.changes });
     pluginLog("LEARN_REPAIR_APPLIED scene=" + row.sceneId + " changes=" + row.changes.length, runtime);
   }
-  return { ok: true, revision: fresh.revision, updated, skipped, results };
+
+  let revision = fresh.revision;
+  let eventId = "";
+  if (undoEntries.length) {
+    // Record before/after state so the repair can be undone like a lesson.
+    const state = learnedPluginState(runtime);
+    if (state.store.revision !== fresh.revision) {
+      pluginLog("LEARN_REPAIR_HISTORY_CONFLICT expected=" + fresh.revision + " found=" + state.store.revision, runtime);
+    }
+    state.store.revision++;
+    const event = {
+      id: newLearnedEventId(),
+      action: "repair",
+      ruleIds: Array.isArray(requestedRuleIds) ? requestedRuleIds.map(String) : [],
+      scenes: undoEntries,
+      timestamp: new Date().toISOString(),
+      revision: state.store.revision
+    };
+    state.store.history.push(event);
+    state.store.history = state.store.history.slice(-LEARNED_HISTORY_LIMIT);
+    saveLearnedPluginState(state, state.store, runtime);
+    revision = state.store.revision;
+    eventId = event.id;
+  }
+  return { ok: true, revision, eventId, updated, skipped, results };
 }
 
 function runLearningOperation(mode, rawInput, runtime) {
@@ -4721,7 +4877,9 @@ if (typeof module !== "undefined" && module.exports) {
     tokenizePathAndName,
     parseCandidates,
     processScene,
-    sceneNeedsAutoTagging
+    sceneNeedsAutoTagging,
+    updateAliasesForObject,
+    repairChangeForRule
   };
 } else {
   main();
